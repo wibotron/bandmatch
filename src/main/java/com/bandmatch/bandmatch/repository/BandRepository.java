@@ -17,6 +17,5 @@ public interface BandRepository extends JpaRepository<Band, Long> {
             "LEFT JOIN b.recruitments r " +
             "WHERE (:genre IS NULL OR g = :genre) " +
             "AND (:position IS NULL OR r.position = :position)")
-    List<Band> findBandsByGenreAndPosition(@Param("genre") String genre,
-                                           @Param("position") String position);
+    List<Band> findBandsByGenreAndPosition(@Param("genre") String genre, @Param("position") String position);
 }

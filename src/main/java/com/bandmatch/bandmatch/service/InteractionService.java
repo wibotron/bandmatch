@@ -16,6 +16,23 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service untuk menangani semua interaksi antara Manager dan BandMember,
+ * termasuk pengiriman tawaran (Offer), lamaran (Application), dan respon
+ * terhadap keduanya.
+ * <p>
+ * Service ini menggunakan interface {@link com.bandmatch.bandmatch.domain.interaction.MusicInteraction}
+ * untuk memastikan bahwa Offer dan Application memiliki perilaku yang konsisten
+ * (send, respond, getStatus, getTimestamp).
+ * </p>
+ * <p>
+ * <strong>Catatan Polimorfisme:</strong>
+ * Method {@link #sendOffer} dan {@link #applyRecruitment} memanggil
+ * {@code offer.send()} dan {@code application.send()} yang merupakan
+ * implementasi berbeda dari interface yang sama. Hal yang sama berlaku
+ * untuk method {@code respond} pada Offer dan Application.
+ * </p>
+ */
 @Service
 public class InteractionService {
 
@@ -37,7 +54,37 @@ public class InteractionService {
     @Autowired
     private BandMemberRepository bandMemberRepository;
 
-    // ===== MANAGER: KIRIM OFFER =====
+    @Autowired
+    private RecruitmentRepository recruitmentRepository;
+
+    // =========================================================================
+    // OFFER (TAWARAN DARI MANAGER KE MEMBER)
+    // =========================================================================
+
+    /**
+     * Mengirim tawaran (offer) dari manager ke member untuk bergabung ke suatu band.
+     * <p>
+     * Validasi dilakukan untuk memastikan:
+     * <ul>
+     *   <li>Manager, member, dan band yang dirujuk ada di database</li>
+     *   <li>Manager tersebut adalah pemilik dari band tujuan (berhak mengirim offer)</li>
+     * </ul>
+     * </p>
+     * <p>
+     * Method ini memanggil {@link Offer#send()} untuk mengatur status menjadi PENDING
+     * atau EXPIRED berdasarkan expiredDate.
+     * </p>
+     *
+     * @param managerId   ID manager pengirim
+     * @param memberId    ID member penerima
+     * @param bandId      ID band tujuan
+     * @param message     pesan tawaran
+     * @param salary      nominal gaji yang ditawarkan
+     * @param expiredDate batas waktu tawaran
+     * @return objek Offer yang telah disimpan
+     * @throws RuntimeException jika manager/member/band tidak ditemukan,
+     *                          atau manager tidak berhak mengelola band tersebut
+     */
     @Transactional
     public Offer sendOffer(Long managerId, Long memberId, Long bandId, String message,
                            BigDecimal salary, LocalDateTime expiredDate) {
@@ -48,18 +95,36 @@ public class InteractionService {
         Band band = bandRepository.findById(bandId)
                 .orElseThrow(() -> new RuntimeException("Band tidak ditemukan!"));
 
-        // Validasi: apakah manager ini pemilik band tersebut?
+        // Validasi kepemilikan band
         if (!band.getManager().getId().equals(managerId)) {
             throw new RuntimeException("Anda tidak berhak mengirim offer untuk band ini!");
         }
 
         Offer offer = new Offer(message, salary, expiredDate, manager, member, band);
-        offer.send();
+        offer.send(); // set status PENDING atau EXPIRED
 
         return offerRepository.save(offer);
     }
 
-    // ===== MEMBER: RESPON OFFER =====
+    /**
+     * Member merespon tawaran (offer) yang diterima.
+     * <p>
+     * Validasi dilakukan untuk memastikan member yang merespon adalah penerima offer.
+     * Jika diterima (accepted = true), member akan otomatis ditambahkan ke band tujuan.
+     * Jika ditolak, status berubah menjadi REJECTED.
+     * </p>
+     * <p>
+     * Method ini memanggil {@link Offer#respond(boolean)} untuk mengubah status
+     * menjadi ACCEPTED atau REJECTED.
+     * </p>
+     *
+     * @param offerId  ID offer yang akan direspon
+     * @param memberId ID member yang merespon (harus sama dengan receiver di offer)
+     * @param accepted true jika menerima, false jika menolak
+     * @return objek Offer yang telah diperbarui
+     * @throws RuntimeException jika offer tidak ditemukan, atau member bukan penerima
+     */
+    @Transactional // <-- DITAMBAHKAN (sebelumnya tidak ada, padahal melakukan perubahan data)
     public Offer respondOffer(Long offerId, Long memberId, boolean accepted) {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new RuntimeException("Offer tidak ditemukan!"));
@@ -69,14 +134,15 @@ public class InteractionService {
             throw new RuntimeException("Anda tidak berhak merespon offer ini!");
         }
 
+        // Ubah status melalui business method di entity
         offer.respond(accepted);
 
-        // ===== JIKA DITERIMA, TAMBAHKAN MEMBER KE BAND =====
+        // Jika diterima, tambahkan member ke band tujuan
         if (accepted) {
             Band band = offer.getBand();
             BandMember member = offer.getReceiver();
 
-            // Cegah duplikat
+            // Cegah duplikasi anggota
             if (!band.getMembers().contains(member)) {
                 band.getMembers().add(member);
                 member.getBands().add(band);
@@ -91,11 +157,33 @@ public class InteractionService {
         return offerRepository.save(offer);
     }
 
-    // ===== MEMBER: LAMAR REKRUTMEN (APPLY) =====
-    // Ganti method applyRecruitment yang tadi dengan ini:
-    @Autowired
-    private RecruitmentRepository recruitmentRepository;
+    // =========================================================================
+    // APPLICATION (LAMARAN DARI MEMBER KE REKRUTMEN)
+    // =========================================================================
 
+    /**
+     * Member mengajukan lamaran (application) ke sebuah rekrutmen.
+     * <p>
+     * Validasi dilakukan secara ketat untuk memastikan:
+     * <ol>
+     *   <li>Rekrutmen masih terbuka (isStillOpen())</li>
+     *   <li>Member belum menjadi anggota band tersebut</li>
+     *   <li>Member belum memiliki lamaran aktif (PENDING atau ACCEPTED) di band yang sama</li>
+     * </ol>
+     * </p>
+     * <p>
+     * Method ini memanggil {@link Application#send()} yang akan memvalidasi
+     * status rekrutmen dan mengatur status lamaran menjadi PENDING.
+     * </p>
+     *
+     * @param memberId          ID member pelamar
+     * @param recruitmentId     ID rekrutmen yang dilamar
+     * @param motivationLetter  surat motivasi dari member
+     * @param availabilityNote  catatan ketersediaan member
+     * @return objek Application yang telah disimpan
+     * @throws RuntimeException jika member/rekrutmen tidak ditemukan,
+     *                          atau salah satu validasi gagal
+     */
     @Transactional
     public Application applyRecruitment(Long memberId, Long recruitmentId,
                                         String motivationLetter, String availabilityNote) {
@@ -133,14 +221,41 @@ public class InteractionService {
             throw new RuntimeException("Anda sudah memiliki lamaran aktif atau sudah diterima di band ini!");
         }
 
-        // 5. Jika lolos semua validasi, buat lamaran baru
+        // 5. Jika lolos semua validasi, buat dan kirim lamaran
         Application application = new Application(motivationLetter, availabilityNote, member, recruitment);
-        application.send(); // ini akan set status menjadi PENDING
+        application.send(); // akan set status menjadi PENDING (atau EXPIRED jika rekrutmen tutup)
 
         return applicationRepository.save(application);
     }
 
-    // ===== MANAGER: RESPON APPLICATION =====
+    // =========================================================================
+    // MANAGER RESPON TERHADAP LAMARAN (APPLICATION)
+    // =========================================================================
+
+    /**
+     * Manager merespon lamaran (application) yang masuk.
+     * <p>
+     * Validasi dilakukan untuk memastikan manager yang merespon adalah pemilik
+     * band dari rekrutmen yang dilamar.
+     * Jika diterima (accepted = true):
+     * <ul>
+     *   <li>Member ditambahkan ke daftar anggota band</li>
+     *   <li>Rekrutmen ditutup (status CLOSED) agar tidak bisa dilamar lagi</li>
+     * </ul>
+     * Jika ditolak, status lamaran menjadi REJECTED.
+     * </p>
+     * <p>
+     * Method ini memanggil {@link Application#respond(boolean)} untuk mengubah
+     * status lamaran.
+     * </p>
+     *
+     * @param applicationId ID lamaran yang akan direspon
+     * @param managerId     ID manager yang merespon
+     * @param accepted      true jika diterima, false jika ditolak
+     * @return objek Application yang telah diperbarui
+     * @throws RuntimeException jika application tidak ditemukan,
+     *                          atau manager tidak berhak merespon
+     */
     @Transactional
     public Application respondApplication(Long applicationId, Long managerId, boolean accepted) {
         // 1. Ambil data lamaran
@@ -179,27 +294,51 @@ public class InteractionService {
         return applicationRepository.save(application);
     }
 
-    // ===== AMBIL SEMUA MEMBER (untuk Manager cari musisi) =====
+    // =========================================================================
+    // QUERY / READ-ONLY METHODS
+    // =========================================================================
+
+    /**
+     * Mengambil semua member yang terdaftar di sistem.
+     * Digunakan oleh manager untuk mencari musisi.
+     *
+     * @return List berisi semua BandMember
+     */
+    @Transactional(readOnly = true)
     public List<BandMember> getAllMembers() {
         return bandMemberRepository.findAll();
     }
 
-    // ===== AMBIL SEMUA OFFER UNTUK MEMBER =====
+    /**
+     * Mengambil semua tawaran (offer) yang diterima oleh seorang member.
+     *
+     * @param memberId ID member
+     * @return List offer yang diterima oleh member tersebut
+     * @throws RuntimeException jika member tidak ditemukan
+     */
+    @Transactional(readOnly = true)
     public List<Offer> getOffersForMember(Long memberId) {
         BandMember member = bandMemberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member tidak ditemukan!"));
         return offerRepository.findByReceiver(member);
     }
 
-    // ===== AMBIL SEMUA APPLICATION UNTUK MANAGER =====
+    /**
+     * Mengambil semua lamaran (application) yang masuk ke band-band yang dikelola
+     * oleh seorang manager.
+     *
+     * @param managerId ID manager
+     * @return List application dari semua band yang dikelola manager
+     * @throws RuntimeException jika manager tidak ditemukan
+     */
+    @Transactional(readOnly = true)
     public List<Application> getApplicationsForManager(Long managerId) {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(() -> new RuntimeException("Manager tidak ditemukan!"));
 
-        // Ambil semua band yang dikelola manager
         List<Band> managedBands = manager.getManagedBands();
 
-        // Kumpulkan semua application dari band-band tersebut
+        // FlatMap untuk menggabungkan semua application dari setiap band
         return managedBands.stream()
                 .flatMap(band -> applicationRepository.findByTargetRecruitment_Band(band).stream())
                 .toList();
