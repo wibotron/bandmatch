@@ -1,48 +1,126 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Tawaran Masuk</title>
-    <style>
-        body { font-family: Arial; max-width: 900px; margin: 30px auto; padding: 20px; }
-        .offer { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
-        .btn { padding: 6px 12px; margin: 0 5px; border: none; border-radius: 4px; cursor: pointer; display: inline-block; }
-        .accept { background: #28a745; color: white; }
-        .reject { background: #dc3545; color: white; }
-        .status-pending { color: #ffc107; font-weight: bold; }
-        .status-accepted { color: #28a745; font-weight: bold; }
-        .status-rejected { color: #dc3545; font-weight: bold; }
-        .back { display: inline-block; margin-bottom: 15px; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h1>📨 Tawaran Masuk</h1>
-<a href="/member/dashboard" class="back">← Kembali ke Dashboard</a>
 
-<div th:if="${offers.isEmpty()}" style="color: gray; margin-top: 20px;">
-    Belum ada tawaran masuk.
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
 </div>
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
 
-<div th:each="offer : ${offers}" class="offer" th:object="${offer}">
-    <h3>Tawaran dari <span th:text="*{sender.name}"></span></h3>
-    <p><strong>Pesan:</strong> <span th:text="*{message}"></span></p>
-    <p><strong>Gaji:</strong> Rp <span th:text="*{salaryOffered}"></span></p>
-    <p><strong>Status:</strong>
-        <span th:if="*{status.name() == 'PENDING'}" class="status-pending">⏳ PENDING</span>
-        <span th:if="*{status.name() == 'ACCEPTED'}" class="status-accepted">✅ ACCEPTED</span>
-        <span th:if="*{status.name() == 'REJECTED'}" class="status-rejected">❌ REJECTED</span>
-        <span th:if="*{status.name() == 'EXPIRED'}" class="status-rejected">⏰ EXPIRED</span>
-    </p>
-
-    <div th:if="*{status.name() == 'PENDING'}" style="margin-top: 10px;">
-        <form th:action="@{/member/offer/{id}/respond(id=*{id})}" method="post" style="display: inline;">
-            <input type="hidden" name="accepted" value="true">
-            <button type="submit" class="btn accept">✅ Terima</button>
-        </form>
-        <form th:action="@{/member/offer/{id}/respond(id=*{id})}" method="post" style="display: inline;">
-            <input type="hidden" name="accepted" value="false">
-            <button type="submit" class="btn reject">❌ Tolak</button>
-        </form>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/member/dashboard" class="navbar-brand">🎸 BandMatch</a>
+    <div class="navbar-right">
+        <a href="/logout" class="logout-link">Logout</a>
     </div>
+</nav>
+
+<div class="container">
+
+    <a href="/member/dashboard" class="back-link">← Kembali ke Dashboard</a>
+
+    <div class="page-header">
+        <h1>📨 Tawaran Masuk</h1>
+        <p>Pantau dan respon tawaran dari manager band</p>
+    </div>
+
+    <div th:if="${offers.isEmpty()}" class="card empty-state">
+        <span class="emoji">📭</span>
+        Belum ada tawaran masuk.
+    </div>
+
+    <div th:each="offer : ${offers}" class="card" th:object="${offer}">
+        <h3 style="margin-bottom:10px;">Tawaran dari <span th:text="*{sender.name}"></span></h3>
+
+        <div class="card-row">
+            <span class="card-label">Pesan</span>
+            <span th:text="*{message}" style="font-size:0.9rem;"></span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Gaji</span>
+            <span th:text="'Rp ' + *{salaryOffered}"></span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Status</span>
+            <span th:if="*{status.name() == 'PENDING'}" class="badge badge-pending">⏳ PENDING</span>
+            <span th:if="*{status.name() == 'ACCEPTED'}" class="badge badge-accepted">✅ ACCEPTED</span>
+            <span th:if="*{status.name() == 'REJECTED'}" class="badge badge-rejected">❌ REJECTED</span>
+            <span th:if="*{status.name() == 'EXPIRED'}" class="badge badge-rejected">⏰ EXPIRED</span>
+        </div>
+
+        <div th:if="*{status.name() == 'PENDING'}" style="margin-top: 14px; display:flex; gap:8px;">
+            <form th:action="@{/member/offer/{id}/respond(id=*{id})}" method="post" style="display: inline;">
+                <input type="hidden" name="accepted" value="true">
+                <button type="submit" class="btn btn-primary btn-sm">✅ Terima</button>
+            </form>
+            <form th:action="@{/member/offer/{id}/respond(id=*{id})}" method="post" style="display: inline;">
+                <input type="hidden" name="accepted" value="false">
+                <button type="submit" class="btn btn-danger btn-sm">❌ Tolak</button>
+            </form>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 100}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.007 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
