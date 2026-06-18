@@ -4,10 +4,18 @@
     <title>Registrasi BandMatch</title>
     <style>
         body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
-        input, select { width: 100%; padding: 8px; margin: 5px 0 15px; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
         button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
         .error { color: red; }
+        optgroup { font-weight: bold; color: #333; }
     </style>
+    <script>
+        function toggleFields() {
+            const role = document.getElementById('role').value;
+            document.getElementById('manager-fields').style.display = role === 'manager' ? 'block' : 'none';
+            document.getElementById('member-fields').style.display = role === 'member' ? 'block' : 'none';
+        }
+    </script>
 </head>
 <body>
 <h1>🎸 Daftar Akun BandMatch</h1>
@@ -24,7 +32,7 @@
     <input type="password" name="password" required>
 
     <label>Daftar sebagai:</label>
-    <select name="role" id="role" onchange="toggleFields()">
+    <select name="role" id="role" onchange="toggleFields()" required>
         <option value="manager">Manager Band</option>
         <option value="member">Band Member (Musisi)</option>
     </select>
@@ -37,20 +45,43 @@
     <div id="member-fields" style="display:none;">
         <label>Nama Panggung (Stage Name):</label>
         <input type="text" name="stageName">
+
         <label>Instrumen Utama:</label>
-        <input type="text" name="primaryInstrument" placeholder="Gitar, Drum, Vokal, dll">
+        <select name="primaryInstrument">
+            <option value="">-- Pilih Instrumen Utama --</option>
+
+            <!-- VOCAL -->
+            <optgroup label="🎤 Vokal">
+                <option value="Main Vocalist">Main Vocalist / Lead Vocalist</option>
+                <option value="Backing Vocalist">Backing Vocalist (Vokal Latar)</option>
+            </optgroup>
+
+            <!-- STRINGS / GITAR -->
+            <optgroup label="🎸 Gitar & Bass">
+                <option value="Lead Guitarist">Lead Guitarist</option>
+                <option value="Rhythm Guitarist">Rhythm Guitarist</option>
+                <option value="Acoustic Guitarist">Acoustic Guitarist</option>
+                <option value="Bassist">Bassist</option>
+            </optgroup>
+
+            <!-- PERKUSI -->
+            <optgroup label="🥁 Perkusi / Ritem">
+                <option value="Drummer">Drummer</option>
+                <option value="Percussionist">Percussionist (Perkusi tambahan)</option>
+            </optgroup>
+
+            <!-- KEYBOARD / TUTS -->
+            <optgroup label="🎹 Keyboard & Tuts">
+                <option value="Keyboardist">Keyboardist</option>
+                <option value="Pianist">Pianist</option>
+                <option value="Synthesizer Player">Synthesizer Player / Sequencer</option>
+            </optgroup>
+        </select>
     </div>
 
     <button type="submit">Daftar Sekarang</button>
 </form>
-<p>Sudah punya akun? <a href="/login">Login di sini</a></p>
 
-<script>
-    function toggleFields() {
-        const role = document.getElementById('role').value;
-        document.getElementById('manager-fields').style.display = role === 'manager' ? 'block' : 'none';
-        document.getElementById('member-fields').style.display = role === 'member' ? 'block' : 'none';
-    }
-</script>
+<p>Sudah punya akun? <a href="/login">Login di sini</a></p>
 </body>
 </html>

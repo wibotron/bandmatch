@@ -54,4 +54,5 @@ public class MemberService {
         return bandRepository.findById(bandId)
                 .orElseThrow(() -> new RuntimeException("Band tidak ditemukan!"));
     }
+
 }

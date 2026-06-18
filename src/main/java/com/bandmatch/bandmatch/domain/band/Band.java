@@ -16,11 +16,21 @@ public class Band {
 
     private String name;
     private String description;
-    private String location;
-    private String spotifyEmbedUrl;
 
-    // --- RELASI: MANY-TO-MANY dengan BandMember (AGREGASI) ---
-    // Lifecycle independen: Band bubar, Member tetap ada
+    // ===== MULTIGENRE (LIST) =====
+    @ElementCollection
+    @CollectionTable(name = "band_genres", joinColumns = @JoinColumn(name = "band_id"))
+    @Column(name = "genre")
+    private List<String> genres = new ArrayList<>();
+
+    // ===== FIELD LAINNYA =====
+    private String youtubeProfile;
+    private String spotifyProfile;
+
+    // ❌ HAPUS: private String genre;
+    // ❌ HAPUS: getGenre() dan setGenre()
+
+    // --- RELASI: MANY-TO-MANY ---
     @ManyToMany
     @JoinTable(
             name = "band_members",
@@ -29,12 +39,10 @@ public class Band {
     )
     private List<BandMember> members = new ArrayList<>();
 
-    // --- RELASI: MANAGER (Directed Association) ---
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Manager manager;
 
-    // --- RELASI: KOMPOSISI (Band mati, Discography & Recruitment ikut mati) ---
     @OneToMany(mappedBy = "band", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Discography> discographies = new ArrayList<>();
 
@@ -68,17 +76,25 @@ public class Band {
         }
     }
 
-    // --- GETTERS & SETTERS (Generate sendiri ya, wajib ada untuk JPA) ---
+    // --- GETTERS & SETTERS ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
-    public String getSpotifyEmbedUrl() { return spotifyEmbedUrl; }
-    public void setSpotifyEmbedUrl(String spotifyEmbedUrl) { this.spotifyEmbedUrl = spotifyEmbedUrl; }
+
+    // MULTIGENRE
+    public List<String> getGenres() { return genres; }
+    public void setGenres(List<String> genres) { this.genres = genres; }
+
+    // ❌ HAPUS getGenre() dan setGenre()
+
+    public String getYoutubeProfile() { return youtubeProfile; }
+    public void setYoutubeProfile(String youtubeProfile) { this.youtubeProfile = youtubeProfile; }
+    public String getSpotifyProfile() { return spotifyProfile; }
+    public void setSpotifyProfile(String spotifyProfile) { this.spotifyProfile = spotifyProfile; }
+
     public List<BandMember> getMembers() { return members; }
     public void setMembers(List<BandMember> members) { this.members = members; }
     public Manager getManager() { return manager; }

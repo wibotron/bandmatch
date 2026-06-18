@@ -7,6 +7,9 @@
         input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
         button { background: #1DB954; color: white; padding: 10px 20px; border: none; cursor: pointer; }
         .back { display: block; margin-top: 20px; }
+        .genre-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0 20px 0; }
+        .genre-grid label { display: flex; align-items: center; gap: 6px; font-weight: normal; cursor: pointer; }
+        .genre-grid input[type="checkbox"] { width: auto; margin: 0; }
     </style>
 </head>
 <body>
@@ -19,14 +22,28 @@
     <label>Nama Band *</label>
     <input type="text" th:field="*{name}" required placeholder="Contoh: The Rolling Stones">
 
+    <label>Genre * (centang semua yang sesuai)</label>
+    <div class="genre-grid">
+        <label><input type="checkbox" th:field="*{genres}" value="Rock"> Rock</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Pop"> Pop</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Jazz"> Jazz</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Metal"> Metal</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Blues"> Blues</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Funk"> Funk</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Reggae"> Reggae</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Dangdut"> Dangdut</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Keroncong"> Keroncong</label>
+        <label><input type="checkbox" th:field="*{genres}" value="Lainnya"> Lainnya</label>
+    </div>
+
     <label>Deskripsi</label>
     <textarea th:field="*{description}" rows="3" placeholder="Deskripsi singkat band..."></textarea>
 
-    <label>Lokasi (Kota)</label>
-    <input type="text" th:field="*{location}" placeholder="Jakarta, Bandung, dll">
+    <label>Link Profil YouTube</label>
+    <input type="url" th:field="*{youtubeProfile}" placeholder="https://www.youtube.com/@namaband">
 
-    <label>Link Embed Spotify (Opsional)</label>
-    <input type="url" th:field="*{spotifyEmbedUrl}" placeholder="https://open.spotify.com/embed/album/xxx">
+    <label>Link Profil Spotify</label>
+    <input type="url" th:field="*{spotifyProfile}" placeholder="https://open.spotify.com/artist/xxx">
 
     <button type="submit">Simpan Band</button>
 </form>

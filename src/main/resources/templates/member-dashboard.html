@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Dashboard Member</title>
     <style>
         body { font-family: Arial; max-width: 800px; margin: 30px auto; padding: 20px; }
@@ -14,6 +15,7 @@
         .nav { margin: 20px 0; }
         .nav a { margin-right: 10px; }
         .band-list { background: #fff; padding: 10px; border-radius: 5px; margin-top: 10px; }
+        .genre-tag { display:inline-block; background:#e0f0e0; padding:2px 8px; border-radius:12px; margin:1px; font-size:0.8em; }
     </style>
 </head>
 <body>
@@ -55,14 +57,17 @@
     </div>
 
     <hr>
-    <!-- ===== BAGIAN BAND YANG DIIKUTI ===== -->
     <h3>🎤 Bergabung di Band</h3>
-    <div th:if="${member.bands.isEmpty()}" style="color: gray;">Belum bergabung dengan band mana pun.</div>
-    <div th:unless="${member.bands.isEmpty()}" class="band-list">
+    <div th:if="${#lists.isEmpty(member.bands)}" style="color: gray;">Belum bergabung dengan band mana pun.</div>
+    <div th:unless="${#lists.isEmpty(member.bands)}" class="band-list">
         <ul style="list-style: none; padding: 0;">
             <li th:each="band : ${member.bands}" style="padding: 5px 0; border-bottom: 1px solid #eee;">
                 🎵 <span th:text="${band.name}"></span>
-                <span style="color:gray; font-size:0.9em;">- <span th:text="${band.location}"></span></span>
+                <span style="color:gray; font-size:0.9em;">
+                    -
+                    <span th:if="${#lists.isEmpty(band.genres)}" style="color:gray;">(belum ada genre)</span>
+                    <span th:unless="${#lists.isEmpty(band.genres)}" th:text="${#strings.arrayJoin(band.genres, ', ')}"></span>
+                </span>
             </li>
         </ul>
     </div>

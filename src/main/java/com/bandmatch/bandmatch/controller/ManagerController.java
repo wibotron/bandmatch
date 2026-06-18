@@ -23,39 +23,32 @@ public class ManagerController {
     @Autowired
     private InteractionService interactionService;
 
-    // Dashboard Manager -> Menampilkan daftar band
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
         Long managerId = (Long) session.getAttribute("userId");
         String role = (String) session.getAttribute("userRole");
-
-        // Validasi session
         if (managerId == null || !"manager".equals(role)) {
             return "redirect:/login";
         }
-
         model.addAttribute("bands", bandService.getBandsByManager(managerId));
         model.addAttribute("managerName", session.getAttribute("userName"));
         return "manager-dashboard";
     }
 
-    // Tampilkan form tambah band
     @GetMapping("/band/create")
     public String showCreateForm(Model model) {
-        model.addAttribute("band", new Band()); // binding object kosong
+        model.addAttribute("band", new Band());
         return "band-form";
     }
 
-    // Proses tambah band
     @PostMapping("/band/create")
     public String processCreate(@ModelAttribute("band") Band band,
                                 HttpSession session) {
         Long managerId = (Long) session.getAttribute("userId");
-        bandService.createBand(band, managerId); // Kirim seluruh objek band
+        bandService.createBand(band, managerId);
         return "redirect:/manager/dashboard";
     }
 
-    // Tampilkan form edit band
     @GetMapping("/band/edit/{bandId}")
     public String showEditForm(@PathVariable Long bandId,
                                HttpSession session,
@@ -66,7 +59,7 @@ public class ManagerController {
         return "band-form";
     }
 
-    // Proses update band
+    // ===== PERBAIKAN DI SINI =====
     @PostMapping("/band/edit/{bandId}")
     public String processEdit(@PathVariable Long bandId,
                               @ModelAttribute("band") Band updatedBand,
@@ -74,17 +67,16 @@ public class ManagerController {
         Long managerId = (Long) session.getAttribute("userId");
         Band existingBand = bandService.getBandByIdAndManager(bandId, managerId);
 
-        // Update field-field yang boleh diubah
         existingBand.setName(updatedBand.getName());
         existingBand.setDescription(updatedBand.getDescription());
-        existingBand.setLocation(updatedBand.getLocation());
-        existingBand.setSpotifyEmbedUrl(updatedBand.getSpotifyEmbedUrl());
+        existingBand.setGenres(updatedBand.getGenres());           // <-- PAKAI SETGENRES
+        existingBand.setYoutubeProfile(updatedBand.getYoutubeProfile());
+        existingBand.setSpotifyProfile(updatedBand.getSpotifyProfile());
 
         bandService.updateBand(existingBand);
         return "redirect:/manager/dashboard";
     }
 
-    // Proses hapus band
     @GetMapping("/band/delete/{bandId}")
     public String processDelete(@PathVariable Long bandId,
                                 HttpSession session) {
@@ -93,36 +85,31 @@ public class ManagerController {
         return "redirect:/manager/dashboard";
     }
 
-    // Menampilkan daftar semua member (musisi) untuk dikirim offer
     @GetMapping("/members")
     public String listMembers(Model model) {
         model.addAttribute("members", interactionService.getAllMembers());
         return "member-list";
     }
 
-    // Tampilkan form kirim offer
     @GetMapping("/offer/send/{memberId}")
     public String showOfferForm(@PathVariable Long memberId, Model model) {
         model.addAttribute("memberId", memberId);
-        model.addAttribute("offer", new Offer()); // binding object
+        model.addAttribute("offer", new Offer());
         return "offer-form";
     }
 
-    // Proses kirim offer
     @PostMapping("/offer/send/{memberId}")
     public String processSendOffer(@PathVariable Long memberId,
                                    @RequestParam String message,
                                    @RequestParam BigDecimal salary,
-                                   @RequestParam String expiredDate, // format yyyy-MM-ddTHH:mm
+                                   @RequestParam String expiredDate,
                                    HttpSession session) {
         Long managerId = (Long) session.getAttribute("userId");
-        LocalDateTime expiry = LocalDateTime.parse(expiredDate); // ISO format
-
+        LocalDateTime expiry = LocalDateTime.parse(expiredDate);
         interactionService.sendOffer(managerId, memberId, message, salary, expiry);
         return "redirect:/manager/members?success=true";
     }
 
-    // Menampilkan daftar lamaran masuk untuk manager
     @GetMapping("/applications")
     public String viewApplications(HttpSession session, Model model) {
         Long managerId = (Long) session.getAttribute("userId");
@@ -130,7 +117,6 @@ public class ManagerController {
         return "manager-applications";
     }
 
-    // Proses respon terhadap lamaran
     @PostMapping("/application/{appId}/respond")
     public String respondApplication(@PathVariable Long appId,
                                      @RequestParam boolean accepted,
@@ -140,8 +126,6 @@ public class ManagerController {
         return "redirect:/manager/applications";
     }
 
-
-    // Tampilkan form buka rekrutmen
     @GetMapping("/band/{bandId}/recruitment/create")
     public String showRecruitmentForm(@PathVariable Long bandId, Model model) {
         model.addAttribute("bandId", bandId);
@@ -149,23 +133,16 @@ public class ManagerController {
         return "recruitment-form";
     }
 
-    // Proses buka rekrutmen
     @PostMapping("/band/{bandId}/recruitment/create")
     public String processOpenRecruitment(@PathVariable Long bandId,
                                          @RequestParam String position,
                                          @RequestParam String requiredInstrument,
-                                         @RequestParam String deadline, // Format: yyyy-MM-ddTHH:mm
+                                         @RequestParam String deadline,
                                          HttpSession session) {
         Long managerId = (Long) session.getAttribute("userId");
-
-        // Validasi kepemilikan band (saya sarankan buat method di Service, tapi kita handle simpel)
-        // Ambil band dan cek manager-nya
         Band band = bandService.getBandByIdAndManager(bandId, managerId);
-
         LocalDateTime deadlineParsed = LocalDateTime.parse(deadline);
         bandService.openRecruitment(bandId, position, requiredInstrument, deadlineParsed);
-
         return "redirect:/manager/dashboard";
     }
-
 }

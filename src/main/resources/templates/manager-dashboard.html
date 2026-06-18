@@ -13,6 +13,8 @@
         .header { display: flex; justify-content: space-between; align-items: center; }
         .nav { margin-bottom: 20px; }
         .nav a { margin-right: 10px; }
+        .member-tag { display:inline-block; background:#f0f0f0; padding:2px 10px; border-radius:12px; margin:2px; }
+        .genre-tag { display:inline-block; background:#e0f0e0; padding:2px 10px; border-radius:12px; margin:2px; font-size:0.9em; }
     </style>
 </head>
 <body>
@@ -36,40 +38,40 @@
 </div>
 <div th:each="band : ${bands}" class="card">
     <h3 th:text="${band.name}">Nama Band</h3>
-    <!-- Tampilkan deskripsi, jika kosong tampilkan placeholder -->
-    <p><strong>Deskripsi:</strong>
-        <span th:text="${band.description != null and band.description != ''} ? ${band.description} : 'Belum diisi'"></span>
+
+    <!-- MULTIGENRE: menampilkan list genre sebagai tag-tag -->
+    <p><strong>Genre:</strong>
+        <span th:if="${#lists.isEmpty(band.genres)}" style="color:gray;">Belum diisi</span>
+        <span th:unless="${#lists.isEmpty(band.genres)}">
+            <span th:each="g : ${band.genres}" class="genre-tag" th:text="${g}"></span>
+        </span>
     </p>
-    <p><strong>Lokasi:</strong>
-        <span th:text="${band.location != null and band.location != ''} ? ${band.location} : 'Belum diisi'"></span>
+
+    <p><strong>Deskripsi:</strong> <span th:text="${band.description != null and band.description != ''} ? ${band.description} : 'Belum diisi'"></span></p>
+    <p th:if="${band.youtubeProfile}">
+        <strong>YouTube:</strong> <a th:href="${band.youtubeProfile}" target="_blank">Kunjungi</a>
     </p>
-    <p th:if="${band.spotifyEmbedUrl}">
-        <strong>Spotify:</strong>
-        <a th:href="${band.spotifyEmbedUrl}" target="_blank">Buka di Spotify</a>
+    <p th:unless="${band.youtubeProfile}"><strong>YouTube:</strong> <span style="color:gray;">Belum ditambahkan</span></p>
+    <p th:if="${band.spotifyProfile}">
+        <strong>Spotify:</strong> <a th:href="${band.spotifyProfile}" target="_blank">Buka</a>
     </p>
-    <p th:unless="${band.spotifyEmbedUrl}">
-        <strong>Spotify:</strong> <span style="color:gray;">Belum ditambahkan</span>
-    </p>
+    <p th:unless="${band.spotifyProfile}"><strong>Spotify:</strong> <span style="color:gray;">Belum ditambahkan</span></p>
+
+    <div style="margin: 10px 0; border-top:1px solid #eee; padding-top:10px;">
+        <strong>👥 Anggota:</strong>
+        <span th:if="${#lists.isEmpty(band.members)}" style="color:gray;">Belum ada anggota</span>
+        <span th:unless="${#lists.isEmpty(band.members)}">
+            <span th:each="member : ${band.members}" class="member-tag">
+                <span th:text="${member.name}"></span> (<span th:text="${member.primaryInstrument}"></span>)
+            </span>
+        </span>
+    </div>
 
     <div style="margin-top: 10px;">
         <a th:href="@{/manager/band/edit/{id}(id=${band.id})}" class="btn btn-warning">✏️ Edit</a>
-        <a th:href="@{/manager/band/delete/{id}(id=${band.id})}"
-           class="btn btn-danger"
-           onclick="return confirm('Yakin ingin menghapus band ini?')">🗑️ Hapus</a>
+        <a th:href="@{/manager/band/delete/{id}(id=${band.id})}" class="btn btn-danger" onclick="return confirm('Yakin ingin menghapus band ini?')">🗑️ Hapus</a>
         <a th:href="@{/manager/band/{id}/recruitment/create(id=${band.id})}" class="btn btn-secondary">📢 Buka Rekrutmen</a>
     </div>
-
-    <!-- Tambahkan ini di dalam card band, setelah tombol Edit/Hapus/Buka Rekrutmen -->
-    <div style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 10px;">
-        <strong>👥 Anggota:</strong>
-        <span th:if="${band.members.isEmpty()}" style="color:gray;">Belum ada anggota</span>
-        <span th:unless="${band.members.isEmpty()}">
-        <span th:each="member : ${band.members}" style="display:inline-block; background:#f0f0f0; padding:2px 10px; border-radius:12px; margin:2px;">
-            <span th:text="${member.name}"></span> (<span th:text="${member.primaryInstrument}"></span>)
-        </span>
-    </span>
-    </div>
-
 </div>
 </body>
 </html>

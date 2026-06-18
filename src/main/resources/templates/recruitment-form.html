@@ -4,17 +4,69 @@
     <title>Buka Rekrutmen</title>
     <style>
         body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
-        input { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
         button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
         .back { margin-top: 20px; display: block; }
+        #customPosition { display: none; }
+        optgroup { font-weight: bold; color: #333; }
     </style>
+    <script>
+        function toggleCustomPosition() {
+            const select = document.getElementById('positionSelect');
+            const customDiv = document.getElementById('customPosition');
+            const customInput = document.getElementById('customPositionInput');
+            if (select.value === 'custom') {
+                customDiv.style.display = 'block';
+                customInput.required = true;
+            } else {
+                customDiv.style.display = 'none';
+                customInput.required = false;
+            }
+        }
+    </script>
 </head>
 <body>
 <h1>📢 Buka Rekrutmen Baru</h1>
 
 <form th:action="@{/manager/band/{id}/recruitment/create(id=${bandId})}" method="post">
-    <label>Posisi yang Dibutuhkan (misal: Gitaris)</label>
-    <input type="text" name="position" placeholder="Gitaris, Vokalis, Drummer" required>
+    <label>Posisi yang Dibutuhkan</label>
+    <select id="positionSelect" name="position" required onchange="toggleCustomPosition()">
+        <option value="">-- Pilih Posisi --</option>
+
+        <!-- VOCAL -->
+        <optgroup label="🎤 Vokal">
+            <option value="Main Vocalist">Main Vocalist / Lead Vocalist</option>
+            <option value="Backing Vocalist">Backing Vocalist (Vokal Latar)</option>
+        </optgroup>
+
+        <!-- STRINGS / GITAR -->
+        <optgroup label="🎸 Gitar & Bass">
+            <option value="Lead Guitarist">Lead Guitarist</option>
+            <option value="Rhythm Guitarist">Rhythm Guitarist</option>
+            <option value="Acoustic Guitarist">Acoustic Guitarist</option>
+            <option value="Bassist">Bassist</option>
+        </optgroup>
+
+        <!-- PERKUSI -->
+        <optgroup label="🥁 Perkusi / Ritem">
+            <option value="Drummer">Drummer</option>
+            <option value="Percussionist">Percussionist (Perkusi tambahan)</option>
+        </optgroup>
+
+        <!-- KEYBOARD / TUTS -->
+        <optgroup label="🎹 Keyboard & Tuts">
+            <option value="Keyboardist">Keyboardist</option>
+            <option value="Pianist">Pianist</option>
+            <option value="Synthesizer Player">Synthesizer Player / Sequencer</option>
+        </optgroup>
+
+        <option value="custom">✏️ Lainnya (tulis sendiri)</option>
+    </select>
+
+    <div id="customPosition">
+        <label>Posisi Lainnya:</label>
+        <input type="text" id="customPositionInput" name="position" placeholder="Misal: Saxophone, Flute, dll">
+    </div>
 
     <label>Instrumen Spesifik (misal: Gitar Elektrik)</label>
     <input type="text" name="requiredInstrument" placeholder="Gitar Elektrik, Bass, dll" required>

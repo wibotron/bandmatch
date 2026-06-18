@@ -3,6 +3,7 @@ package com.bandmatch.bandmatch.controller;
 import com.bandmatch.bandmatch.domain.band.Band;
 import com.bandmatch.bandmatch.domain.portfolio.Portfolio;
 import com.bandmatch.bandmatch.domain.user.BandMember;
+import com.bandmatch.bandmatch.service.BandService;
 import com.bandmatch.bandmatch.service.InteractionService;
 import com.bandmatch.bandmatch.service.MemberService;
 import jakarta.servlet.http.HttpSession;
@@ -11,12 +12,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/member")
 public class MemberController {
 
     @Autowired
     private MemberService memberService;
+    @Autowired
+    private BandService bandService;
     @Autowired
     private InteractionService interactionService;
 
@@ -59,8 +64,27 @@ public class MemberController {
 
     // HALAMAN EKSPLORASI BAND
     @GetMapping("/explore")
-    public String exploreBands(Model model) {
-        model.addAttribute("bands", memberService.getAllBands());
+    public String exploreBands(@RequestParam(required = false) String genre,
+                               @RequestParam(required = false) String position,
+                               Model model) {
+        List<Band> bands = bandService.searchBands(genre, position);
+        model.addAttribute("bands", bands);
+        model.addAttribute("selectedGenre", genre);
+        model.addAttribute("selectedPosition", position);
+
+        // ===== PERBAIKAN: ambil genre dari LIST (flatMap) =====
+        List<String> genres = bandService.getAllBands().stream()
+                .flatMap(band -> band.getGenres().stream())  // <-- pakai flatMap
+                .filter(g -> g != null && !g.isEmpty())
+                .distinct()
+                .sorted()
+                .toList();
+        model.addAttribute("genres", genres);
+
+        List<String> positions = List.of("Lead Gitar", "Rhythm Gitar", "Bass Gitar", "Drummer",
+                "Gitar Akustik", "Vokalis", "Vokalis 2", "Vokalis 3");
+        model.addAttribute("positions", positions);
+
         return "explore-bands";
     }
 
