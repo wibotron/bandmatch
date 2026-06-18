@@ -3,74 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <title>Dashboard Member</title>
-    <style>
-        body { font-family: Arial; max-width: 800px; margin: 30px auto; padding: 20px; }
-        .profile-card { border: 1px solid #ddd; padding: 20px; border-radius: 8px; background: #f9f9f9; }
-        .field { margin: 10px 0; }
-        .label { font-weight: bold; display: inline-block; width: 150px; }
-        .btn { display: inline-block; padding: 8px 16px; margin: 5px; text-decoration: none; border-radius: 4px; }
-        .btn-primary { background: #1DB954; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
-        .nav { margin: 20px 0; }
-        .nav a { margin-right: 10px; }
-        .band-list { background: #fff; padding: 10px; border-radius: 5px; margin-top: 10px; }
-        .genre-tag { display:inline-block; background:#e0f0e0; padding:2px 8px; border-radius:12px; margin:1px; font-size:0.8em; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="header">
-    <h1>🎸 Dashboard Member</h1>
-    <div>
-        <span>Halo, <strong th:text="${memberName}"></strong>!</span>
-        <a href="/logout" style="margin-left: 15px;">Logout</a>
+
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
+</div>
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/member/dashboard" class="navbar-brand">🎸 BandMatch</a>
+    <div class="navbar-right">
+        <span>Halo, <strong th:text="${memberName}">Member</strong>!</span>
+        <a href="/logout" class="logout-link">Logout</a>
     </div>
+</nav>
+
+<div class="container">
+
+    <!-- HERO GREETING -->
+    <div style="margin-bottom:32px; padding:28px 32px; background:rgba(29,185,84,0.07); border:1px solid rgba(29,185,84,0.15); border-radius:16px; display:flex; align-items:center; gap:20px; position:relative; overflow:hidden;">
+        <div style="font-size:3rem;">🎤</div>
+        <div>
+            <h2 style="font-size:1.4rem; color:#e8e8f0; margin-bottom:4px;">Selamat datang kembali, <span style="color:#1DB954;" th:text="${memberName}">Member</span>!</h2>
+            <p style="color:#7777aa; margin:0;">Kelola portofolio & temukan band impianmu</p>
+        </div>
+        <div style="position:absolute; right:-20px; top:-20px; font-size:8rem; opacity:0.04; pointer-events:none;">🎸</div>
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:32px;">
+        <a href="/member/portfolio/edit" style="background:rgba(29,185,84,0.1); border:1px solid rgba(29,185,84,0.25); border-radius:12px; padding:18px; text-decoration:none; text-align:center; transition:all 0.2s; display:block;">
+            <div style="font-size:1.8rem; margin-bottom:8px;">✏️</div>
+            <div style="color:#1DB954; font-weight:600; font-size:0.9rem;">Edit Portofolio</div>
+        </a>
+        <a href="/member/explore" style="background:rgba(139,92,246,0.1); border:1px solid rgba(139,92,246,0.25); border-radius:12px; padding:18px; text-decoration:none; text-align:center; transition:all 0.2s; display:block;">
+            <div style="font-size:1.8rem; margin-bottom:8px;">🔍</div>
+            <div style="color:#a78bfa; font-weight:600; font-size:0.9rem;">Eksplorasi Band</div>
+        </a>
+        <a href="/member/offers" style="background:rgba(52,152,219,0.1); border:1px solid rgba(52,152,219,0.25); border-radius:12px; padding:18px; text-decoration:none; text-align:center; transition:all 0.2s; display:block;">
+            <div style="font-size:1.8rem; margin-bottom:8px;">📨</div>
+            <div style="color:#60a5fa; font-weight:600; font-size:0.9rem;">Tawaran Masuk</div>
+        </a>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+        <!-- PROFIL CARD -->
+        <div class="card" style="height:fit-content;">
+            <h3 style="color:#7777aa; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.08em; margin-bottom:16px;">👤 Profil Saya</h3>
+            <div class="card-row">
+                <span class="card-label">Nama Panggung</span>
+                <span th:text="${member.stageName}">-</span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Instrumen</span>
+                <span class="tag" th:text="${member.primaryInstrument}">-</span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Email</span>
+                <span style="color:#7777aa; font-size:0.9rem;" th:text="${member.email}">-</span>
+            </div>
+        </div>
+
+        <!-- PORTOFOLIO CARD -->
+        <div class="card" style="height:fit-content;">
+            <h3 style="color:#7777aa; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.08em; margin-bottom:16px;">📋 Portofolio</h3>
+            <div class="card-row">
+                <span class="card-label">Bio</span>
+                <span style="font-size:0.9rem;" th:text="${portfolio.bio != null and portfolio.bio != ''} ? ${portfolio.bio} : 'Belum diisi'">-</span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Skill Set</span>
+                <span style="font-size:0.9rem;" th:text="${portfolio.skillSet != null and portfolio.skillSet != ''} ? ${portfolio.skillSet} : 'Belum diisi'">-</span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">YouTube</span>
+                <a th:if="${portfolio.youtubeChannel}" th:href="${portfolio.youtubeChannel}" target="_blank" style="font-size:0.9rem;">▶ Kunjungi</a>
+                <span th:unless="${portfolio.youtubeChannel}" style="color:#7777aa; font-size:0.9rem;">-</span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Instagram</span>
+                <a th:if="${portfolio.instagramHandle}" th:href="'https://instagram.com/' + ${portfolio.instagramHandle}" target="_blank" style="font-size:0.9rem;">@<span th:text="${portfolio.instagramHandle}"></span></a>
+                <span th:unless="${portfolio.instagramHandle}" style="color:#7777aa; font-size:0.9rem;">-</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BAND LIST -->
+    <div class="card" style="margin-top:20px;">
+        <h3 style="color:#7777aa; text-transform:uppercase; font-size:0.78rem; letter-spacing:0.08em; margin-bottom:16px;">🎵 Band Saya</h3>
+        <div th:if="${#lists.isEmpty(member.bands)}" class="empty-state">
+            <span class="emoji">🎸</span>
+            Belum bergabung dengan band mana pun.<br>
+            <a href="/member/explore" style="margin-top:10px; display:inline-block;">Cari band sekarang →</a>
+        </div>
+        <div th:unless="${#lists.isEmpty(member.bands)}">
+            <div th:each="band : ${member.bands}" style="padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:12px;">
+                <div style="width:36px; height:36px; background:rgba(139,92,246,0.15); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🎵</div>
+                <div>
+                    <div style="font-weight:600;" th:text="${band.name}">Band</div>
+                    <div style="font-size:0.85rem; color:#7777aa;">
+                        <span th:if="${#lists.isEmpty(band.genres)}">Belum ada genre</span>
+                        <span th:unless="${#lists.isEmpty(band.genres)}" th:text="${#strings.arrayJoin(band.genres, ', ')}"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<div class="nav">
-    <a href="/member/portfolio/edit" class="btn btn-primary">✏️ Edit Portofolio</a>
-    <a href="/member/explore" class="btn btn-secondary">🔍 Eksplorasi Band</a>
-    <a href="/member/offers" class="btn btn-secondary">📨 Tawaran Masuk</a>
-</div>
-
-<h2>Profil Saya</h2>
-<div class="profile-card">
-    <div class="field"><span class="label">Nama Panggung:</span> <span th:text="${member.stageName}">-</span></div>
-    <div class="field"><span class="label">Instrumen Utama:</span> <span th:text="${member.primaryInstrument}">-</span></div>
-    <div class="field"><span class="label">Email:</span> <span th:text="${member.email}">-</span></div>
-
-    <hr>
-    <h3>📋 Portofolio</h3>
-    <div class="field"><span class="label">Bio:</span>
-        <span th:text="${portfolio.bio != null and portfolio.bio != ''} ? ${portfolio.bio} : 'Belum diisi'"></span>
-    </div>
-    <div class="field"><span class="label">Skill Set:</span>
-        <span th:text="${portfolio.skillSet != null and portfolio.skillSet != ''} ? ${portfolio.skillSet} : 'Belum diisi'"></span>
-    </div>
-    <div class="field"><span class="label">YouTube:</span>
-        <a th:if="${portfolio.youtubeChannel}" th:href="${portfolio.youtubeChannel}" target="_blank">Kunjungi</a>
-        <span th:unless="${portfolio.youtubeChannel}">-</span>
-    </div>
-    <div class="field"><span class="label">Instagram:</span>
-        <a th:if="${portfolio.instagramHandle}" th:href="'https://instagram.com/' + ${portfolio.instagramHandle}" target="_blank">@<span th:text="${portfolio.instagramHandle}"></span></a>
-        <span th:unless="${portfolio.instagramHandle}">-</span>
-    </div>
-
-    <hr>
-    <h3>🎤 Bergabung di Band</h3>
-    <div th:if="${#lists.isEmpty(member.bands)}" style="color: gray;">Belum bergabung dengan band mana pun.</div>
-    <div th:unless="${#lists.isEmpty(member.bands)}" class="band-list">
-        <ul style="list-style: none; padding: 0;">
-            <li th:each="band : ${member.bands}" style="padding: 5px 0; border-bottom: 1px solid #eee;">
-                🎵 <span th:text="${band.name}"></span>
-                <span style="color:gray; font-size:0.9em;">
-                    -
-                    <span th:if="${#lists.isEmpty(band.genres)}" style="color:gray;">(belum ada genre)</span>
-                    <span th:unless="${#lists.isEmpty(band.genres)}" th:text="${#strings.arrayJoin(band.genres, ', ')}"></span>
-                </span>
-            </li>
-        </ul>
-    </div>
-</div>
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 100}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.007 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
