@@ -1,5 +1,6 @@
 package com.bandmatch.bandmatch.domain.interaction;
 
+import com.bandmatch.bandmatch.domain.band.Band;
 import com.bandmatch.bandmatch.domain.user.Manager;
 import com.bandmatch.bandmatch.domain.user.BandMember;
 import jakarta.persistence.*;
@@ -27,17 +28,22 @@ public class Offer implements MusicInteraction {
     @ManyToOne
     private BandMember receiver;
 
+    @ManyToOne
+    @JoinColumn(name = "band_id") // <-- INI BARU
+    private Band band;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Offer() {}
 
     public Offer(String message, BigDecimal salaryOffered, LocalDateTime expiredDate,
-                 Manager sender, BandMember receiver) {
+                 Manager sender, BandMember receiver, Band band) { // <-- TAMBAH band di constructor
         this.message = message;
         this.salaryOffered = salaryOffered;
         this.expiredDate = expiredDate;
         this.sender = sender;
         this.receiver = receiver;
+        this.band = band;
     }
 
     @Override
@@ -63,7 +69,7 @@ public class Offer implements MusicInteraction {
     @Override
     public LocalDateTime getTimestamp() { return createdAt; }
 
-    // GETTERS & SETTERS
+    // --- GETTERS & SETTERS (tambahkan getter/setter untuk band) ---
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getMessage() { return message; }
@@ -76,4 +82,6 @@ public class Offer implements MusicInteraction {
     public void setSender(Manager sender) { this.sender = sender; }
     public BandMember getReceiver() { return receiver; }
     public void setReceiver(BandMember receiver) { this.receiver = receiver; }
+    public Band getBand() { return band; }          // <-- BARU
+    public void setBand(Band band) { this.band = band; } // <-- BARU
 }

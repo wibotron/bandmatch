@@ -39,24 +39,27 @@ public class InteractionService {
 
     // ===== MANAGER: KIRIM OFFER =====
     @Transactional
-    public Offer sendOffer(Long managerId, Long memberId, String message,
+    public Offer sendOffer(Long managerId, Long memberId, Long bandId, String message,
                            BigDecimal salary, LocalDateTime expiredDate) {
         Manager manager = managerRepository.findById(managerId)
                 .orElseThrow(() -> new RuntimeException("Manager tidak ditemukan!"));
         BandMember member = bandMemberRepository.findById(memberId)
                 .orElseThrow(() -> new RuntimeException("Member tidak ditemukan!"));
+        Band band = bandRepository.findById(bandId)
+                .orElseThrow(() -> new RuntimeException("Band tidak ditemukan!"));
 
-        Offer offer = new Offer(message, salary, expiredDate, manager, member);
+        // Validasi: apakah manager ini pemilik band tersebut?
+        if (!band.getManager().getId().equals(managerId)) {
+            throw new RuntimeException("Anda tidak berhak mengirim offer untuk band ini!");
+        }
 
-        // PANGGIL METHOD SEND() DARI INTERFACE!
-        // Di sini polimorfisme terjadi: offer.send() akan mengecek expiredDate
+        Offer offer = new Offer(message, salary, expiredDate, manager, member, band);
         offer.send();
 
         return offerRepository.save(offer);
     }
 
     // ===== MEMBER: RESPON OFFER =====
-    @Transactional
     public Offer respondOffer(Long offerId, Long memberId, boolean accepted) {
         Offer offer = offerRepository.findById(offerId)
                 .orElseThrow(() -> new RuntimeException("Offer tidak ditemukan!"));
@@ -66,9 +69,24 @@ public class InteractionService {
             throw new RuntimeException("Anda tidak berhak merespon offer ini!");
         }
 
-        // PANGGIL METHOD RESPOND() DARI INTERFACE!
-        // offer.respond() akan mengecek apakah status sudah EXPIRED
         offer.respond(accepted);
+
+        // ===== JIKA DITERIMA, TAMBAHKAN MEMBER KE BAND =====
+        if (accepted) {
+            Band band = offer.getBand();
+            BandMember member = offer.getReceiver();
+
+            // Cegah duplikat
+            if (!band.getMembers().contains(member)) {
+                band.getMembers().add(member);
+                member.getBands().add(band);
+                bandRepository.save(band);
+                bandMemberRepository.save(member);
+                System.out.println("✅ Member " + member.getName() + " bergabung ke band " + band.getName());
+            } else {
+                System.out.println("⚠️ Member sudah menjadi anggota band ini.");
+            }
+        }
 
         return offerRepository.save(offer);
     }

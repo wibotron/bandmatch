@@ -4,13 +4,21 @@
     <title>Kirim Offer</title>
     <style>
         body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
-        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
+        input, select, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
         button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
 <h1>📨 Kirim Offer ke Musisi</h1>
 <form th:action="@{/manager/offer/send/{id}(id=${memberId})}" method="post">
+
+    <!-- ===== Pilih Band Tujuan (BARU) ===== -->
+    <label>Pilih Band Tujuan:</label>
+    <select name="bandId" required>
+        <option value="">-- Pilih Band --</option>
+        <option th:each="band : ${managedBands}" th:value="${band.id}" th:text="${band.name}"></option>
+    </select>
+
     <label>Pesan (Deskripsi tawaran)</label>
     <textarea name="message" rows="4" placeholder="Kami mencari gitaris untuk proyek baru..." required></textarea>
 

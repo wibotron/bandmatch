@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Controller
 @RequestMapping("/manager")
@@ -92,7 +93,12 @@ public class ManagerController {
     }
 
     @GetMapping("/offer/send/{memberId}")
-    public String showOfferForm(@PathVariable Long memberId, Model model) {
+    public String showOfferForm(@PathVariable Long memberId, HttpSession session, Model model) {
+        Long managerId = (Long) session.getAttribute("userId");
+
+        // Ambil semua band yang dikelola manager ini
+        List<Band> managedBands = bandService.getBandsByManager(managerId);
+        model.addAttribute("managedBands", managedBands);
         model.addAttribute("memberId", memberId);
         model.addAttribute("offer", new Offer());
         return "offer-form";
@@ -103,10 +109,11 @@ public class ManagerController {
                                    @RequestParam String message,
                                    @RequestParam BigDecimal salary,
                                    @RequestParam String expiredDate,
+                                   @RequestParam Long bandId, // <-- TAMBAHKAN INI
                                    HttpSession session) {
         Long managerId = (Long) session.getAttribute("userId");
         LocalDateTime expiry = LocalDateTime.parse(expiredDate);
-        interactionService.sendOffer(managerId, memberId, message, salary, expiry);
+        interactionService.sendOffer(managerId, memberId, bandId, message, salary, expiry);
         return "redirect:/manager/members?success=true";
     }
 
