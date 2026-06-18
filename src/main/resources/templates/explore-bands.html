@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Eksplorasi Band</title>
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: 30px auto; padding: 20px; }
+        .band-card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; }
+        .btn { display: inline-block; padding: 6px 12px; text-decoration: none; background: #1DB954; color: white; border-radius: 4px; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>🔍 Eksplorasi Band</h1>
+    <a href="/member/dashboard">← Kembali ke Dashboard</a>
+</div>
+
+<div th:if="${bands.isEmpty()}" style="color: gray;">
+    Belum ada band yang terdaftar di sistem.
+</div>
+
+<div th:each="band : ${bands}" class="band-card">
+    <h3><span th:text="${band.name}"></span></h3>
+    <p><strong>Lokasi:</strong> <span th:text="${band.location}">-</span></p>
+    <p><strong>Deskripsi:</strong> <span th:text="${band.description}">-</span></p>
+    <p><strong>Rekrutmen Aktif:</strong>
+        <span th:text="${#lists.size(band.recruitments)}"></span> posisi terbuka
+    </p>
+    <a th:href="@{/member/band/{id}(id=${band.id})}" class="btn">Lihat Detail & Lamar</a>
+</div>
+</body>
+</html>

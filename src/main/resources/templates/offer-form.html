@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Kirim Offer</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
+        button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+<h1>📨 Kirim Offer ke Musisi</h1>
+<form th:action="@{/manager/offer/send/{id}(id=${memberId})}" method="post">
+    <label>Pesan (Deskripsi tawaran)</label>
+    <textarea name="message" rows="4" placeholder="Kami mencari gitaris untuk proyek baru..." required></textarea>
+
+    <label>Gaji/Tawaran Finansial (Rp)</label>
+    <input type="number" name="salary" step="100000" placeholder="5000000" required>
+
+    <label>Batas Waktu Offer (ISO format: YYYY-MM-DDTHH:mm)</label>
+    <input type="datetime-local" name="expiredDate" required>
+
+    <button type="submit">Kirim Offer</button>
+</form>
+<a href="/manager/members">← Batal</a>
+</body>
+</html>

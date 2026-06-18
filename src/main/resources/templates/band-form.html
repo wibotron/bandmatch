@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Form Band</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
+        button { background: #1DB954; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .back { display: block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<h1 th:text="${band.id == null} ? 'Buat Band Baru' : 'Edit Band'">Form Band</h1>
+
+<form th:action="${band.id == null} ? '/manager/band/create' : '/manager/band/edit/' + ${band.id}"
+      th:object="${band}"
+      method="post">
+
+    <label>Nama Band *</label>
+    <input type="text" th:field="*{name}" required placeholder="Contoh: The Rolling Stones">
+
+    <label>Deskripsi</label>
+    <textarea th:field="*{description}" rows="3" placeholder="Deskripsi singkat band..."></textarea>
+
+    <label>Lokasi (Kota)</label>
+    <input type="text" th:field="*{location}" placeholder="Jakarta, Bandung, dll">
+
+    <label>Link Embed Spotify (Opsional)</label>
+    <input type="url" th:field="*{spotifyEmbedUrl}" placeholder="https://open.spotify.com/embed/album/xxx">
+
+    <button type="submit">Simpan Band</button>
+</form>
+
+<a href="/manager/dashboard" class="back">← Kembali ke Dashboard</a>
+</body>
+</html>

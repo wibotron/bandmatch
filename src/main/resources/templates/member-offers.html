@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Tawaran Masuk</title>
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: 30px auto; padding: 20px; }
+        .offer { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .btn { padding: 6px 12px; margin: 0 5px; border: none; border-radius: 4px; cursor: pointer; display: inline-block; }
+        .accept { background: #28a745; color: white; }
+        .reject { background: #dc3545; color: white; }
+        .status-pending { color: #ffc107; font-weight: bold; }
+        .status-accepted { color: #28a745; font-weight: bold; }
+        .status-rejected { color: #dc3545; font-weight: bold; }
+        .back { display: inline-block; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+<h1>📨 Tawaran Masuk</h1>
+<a href="/member/dashboard" class="back">← Kembali ke Dashboard</a>
+
+<div th:if="${offers.isEmpty()}" style="color: gray; margin-top: 20px;">
+    Belum ada tawaran masuk.
+</div>
+
+<div th:each="offer : ${offers}" class="offer" th:object="${offer}">
+    <h3>Tawaran dari <span th:text="*{sender.name}"></span></h3>
+    <p><strong>Pesan:</strong> <span th:text="*{message}"></span></p>
+    <p><strong>Gaji:</strong> Rp <span th:text="*{salaryOffered}"></span></p>
+    <p><strong>Status:</strong>
+        <span th:if="*{status.name() == 'PENDING'}" class="status-pending">⏳ PENDING</span>
+        <span th:if="*{status.name() == 'ACCEPTED'}" class="status-accepted">✅ ACCEPTED</span>
+        <span th:if="*{status.name() == 'REJECTED'}" class="status-rejected">❌ REJECTED</span>
+        <span th:if="*{status.name() == 'EXPIRED'}" class="status-rejected">⏰ EXPIRED</span>
+    </p>
+
+    <div th:if="*{status.name() == 'PENDING'}" style="margin-top: 10px;">
+        <form th:action="@{/member/offer/{id}/respond(id=*{id})}" method="post" style="display: inline;">
+            <input type="hidden" name="accepted" value="true">
+            <button type="submit" class="btn accept">✅ Terima</button>
+        </form>
+        <form th:action="@{/member/offer/{id}/respond(id=*{id})}" method="post" style="display: inline;">
+            <input type="hidden" name="accepted" value="false">
+            <button type="submit" class="btn reject">❌ Tolak</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

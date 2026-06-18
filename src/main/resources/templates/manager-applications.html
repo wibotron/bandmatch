@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Lamaran Masuk</title>
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: 30px auto; padding: 20px; }
+        .app { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .btn { padding: 5px 10px; margin: 0 5px; border: none; border-radius: 4px; cursor: pointer; }
+        .accept { background: #28a745; color: white; }
+        .reject { background: #dc3545; color: white; }
+        .status { font-weight: bold; }
+        .header { display: flex; justify-content: space-between; align-items: center; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1>📩 Lamaran Masuk</h1>
+    <a href="/manager/dashboard">← Kembali ke Dashboard</a>
+</div>
+
+<div th:if="${applications.isEmpty()}" style="color: gray; margin-top: 20px;">
+    Belum ada lamaran masuk untuk band yang Anda kelola.
+</div>
+
+<div th:each="app : ${applications}" class="app">
+    <h3>Lamaran untuk: <span th:text="${app.targetRecruitment.position}"></span>
+        di <span th:text="${app.targetRecruitment.band.name}"></span>
+    </h3>
+    <p><strong>Pelamar:</strong> <span th:text="${app.applicant.name}"></span>
+        (<span th:text="${app.applicant.primaryInstrument}"></span>)
+    </p>
+    <p><strong>Motivasi:</strong> <span th:text="${app.motivationLetter}"></span></p>
+    <p><strong>Ketersediaan:</strong> <span th:text="${app.availabilityNote}"></span></p>
+    <p><strong>Status:</strong> <span class="status" th:text="${app.status}"></span></p>
+
+    <!-- PERBAIKAN: gunakan .name() untuk membandingkan enum -->
+    <div th:if="${app.status.name() == 'PENDING'}" style="margin-top: 10px;">
+        <form th:action="@{/manager/application/{id}/respond(id=${app.id})}" method="post" style="display:inline;">
+            <input type="hidden" name="accepted" value="true">
+            <button type="submit" class="btn accept">✅ Terima</button>
+        </form>
+        <form th:action="@{/manager/application/{id}/respond(id=${app.id})}" method="post" style="display:inline;">
+            <input type="hidden" name="accepted" value="false">
+            <button type="submit" class="btn reject">❌ Tolak</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

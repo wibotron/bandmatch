@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Registrasi BandMatch</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0 15px; }
+        button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+<h1>🎸 Daftar Akun BandMatch</h1>
+<p th:if="${error}" class="error" th:text="${error}"></p>
+
+<form method="post">
+    <label>Nama Lengkap:</label>
+    <input type="text" name="name" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" required>
+
+    <label>Password:</label>
+    <input type="password" name="password" required>
+
+    <label>Daftar sebagai:</label>
+    <select name="role" id="role" onchange="toggleFields()">
+        <option value="manager">Manager Band</option>
+        <option value="member">Band Member (Musisi)</option>
+    </select>
+
+    <div id="manager-fields">
+        <label>Jabatan di Perusahaan (contoh: Talent Manager):</label>
+        <input type="text" name="companyPosition">
+    </div>
+
+    <div id="member-fields" style="display:none;">
+        <label>Nama Panggung (Stage Name):</label>
+        <input type="text" name="stageName">
+        <label>Instrumen Utama:</label>
+        <input type="text" name="primaryInstrument" placeholder="Gitar, Drum, Vokal, dll">
+    </div>
+
+    <button type="submit">Daftar Sekarang</button>
+</form>
+<p>Sudah punya akun? <a href="/login">Login di sini</a></p>
+
+<script>
+    function toggleFields() {
+        const role = document.getElementById('role').value;
+        document.getElementById('manager-fields').style.display = role === 'manager' ? 'block' : 'none';
+        document.getElementById('member-fields').style.display = role === 'member' ? 'block' : 'none';
+    }
+</script>
+</body>
+</html>

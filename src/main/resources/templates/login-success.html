@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Login Berhasil</title></head>
+<body>
+<h1>👋 Selamat datang, <span th:text="${name}"></span>!</h1>
+<p>Anda akan diarahkan ke dashboard: <a th:href="${redirectUrl}" th:text="${redirectUrl}"></a></p>
+<p>Permissions Anda: <span th:text="${permissions}"></span></p>
+<p><em>Perhatikan: Method getDashboardRedirectUrl() dan getPermissions() berasal dari abstract class User,
+    tetapi hasilnya berbeda tergantung role (Polymorphism)!</em></p>
+</body>
+</html>

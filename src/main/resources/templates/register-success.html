@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Registrasi Berhasil</title></head>
+<body>
+<h1>✅ Registrasi Berhasil!</h1>
+<p>Halo, <strong th:text="${userName}"></strong>!</p>
+<p>Anda terdaftar sebagai <strong th:text="${role}"></strong>.</p>
+<p>Dashboard Anda ada di: <a th:href="${dashboardUrl}" th:text="${dashboardUrl}"></a></p>
+<a href="/login">Login sekarang</a>
+</body>
+</html>

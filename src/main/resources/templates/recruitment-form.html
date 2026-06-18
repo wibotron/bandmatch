@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Buka Rekrutmen</title>
+    <style>
+        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
+        input { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
+        button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
+        .back { margin-top: 20px; display: block; }
+    </style>
+</head>
+<body>
+<h1>📢 Buka Rekrutmen Baru</h1>
+
+<form th:action="@{/manager/band/{id}/recruitment/create(id=${bandId})}" method="post">
+    <label>Posisi yang Dibutuhkan (misal: Gitaris)</label>
+    <input type="text" name="position" placeholder="Gitaris, Vokalis, Drummer" required>
+
+    <label>Instrumen Spesifik (misal: Gitar Elektrik)</label>
+    <input type="text" name="requiredInstrument" placeholder="Gitar Elektrik, Bass, dll" required>
+
+    <label>Batas Akhir Pendaftaran (ISO format: YYYY-MM-DDTHH:mm)</label>
+    <input type="datetime-local" name="deadline" required>
+
+    <button type="submit">Buka Rekrutmen</button>
+</form>
+
+<a href="/manager/dashboard" class="back">← Kembali ke Dashboard</a>
+</body>
+</html>

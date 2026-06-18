@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Login BandMatch</title></head>
+<body>
+<h1>🔐 Login</h1>
+<p th:if="${error}" style="color:red" th:text="${error}"></p>
+<form method="post">
+    <label>Email:</label>
+    <input type="email" name="email" required>
+    <label>Password:</label>
+    <input type="password" name="password" required>
+    <button type="submit">Login</button>
+</form>
+<p>Belum punya akun? <a href="/register">Daftar di sini</a></p>
+</body>
+</html>

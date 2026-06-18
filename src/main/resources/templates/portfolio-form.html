@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Portofolio</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
+        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
+        button { background: #1DB954; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .back { display: block; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<h1>📝 Edit Portofolio</h1>
+
+<form th:action="@{/member/portfolio/edit}" th:object="${portfolio}" method="post">
+    <label>Bio (Deskripsi diri)</label>
+    <textarea th:field="*{bio}" rows="4" placeholder="Ceritakan tentang dirimu sebagai musisi..."></textarea>
+
+    <label>Skill Set (pisahkan dengan koma)</label>
+    <input type="text" th:field="*{skillSet}" placeholder="Gitar, Vokal, Produksi, dll">
+
+    <label>Link YouTube Channel</label>
+    <input type="url" th:field="*{youtubeChannel}" placeholder="https://www.youtube.com/c/namachannel">
+
+    <label>Username Instagram</label>
+    <input type="text" th:field="*{instagramHandle}" placeholder="username_anda (tanpa @)">
+
+    <button type="submit">Simpan Portofolio</button>
+</form>
+
+<a href="/member/dashboard" class="back">← Kembali ke Dashboard</a>
+</body>
+</html>

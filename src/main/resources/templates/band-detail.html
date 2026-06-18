@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Detail Band</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: 30px auto; padding: 20px; }
+        .rec { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        .btn { background: #1DB954; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
+        .member-list { background: #f9f9f9; padding: 10px; border-radius: 5px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+<h1>🎵 <span th:text="${band.name}"></span></h1>
+<p><strong>Lokasi:</strong> <span th:text="${band.location}"></span></p>
+<p><strong>Deskripsi:</strong> <span th:text="${band.description}"></span></p>
+<a href="/member/explore">← Kembali ke Eksplorasi</a>
+
+<div th:if="${param.applied}" style="color: green; margin: 15px 0;">✅ Lamaran berhasil dikirim!</div>
+
+<!-- ===== BAGIAN ANGGOTA BAND ===== -->
+<h2>👥 Anggota Band Saat Ini</h2>
+<div th:if="${band.members.isEmpty()}" style="color: gray;">Belum ada anggota yang bergabung.</div>
+<div th:unless="${band.members.isEmpty()}" class="member-list">
+    <ul style="list-style: none; padding: 0;">
+        <li th:each="member : ${band.members}" style="padding: 5px 0; border-bottom: 1px solid #eee;">
+            <strong><span th:text="${member.name}"></span></strong>
+            (<span th:text="${member.primaryInstrument}"></span>)
+            <span style="color:gray; font-size:0.9em;">- <span th:text="${member.stageName}"></span></span>
+        </li>
+    </ul>
+</div>
+
+<!-- ===== BAGIAN REKRUTMEN ===== -->
+<h2>📢 Rekrutmen Aktif</h2>
+<div th:each="rec : ${recruitments}" class="rec">
+    <h4>Posisi: <span th:text="${rec.position}"></span></h4>
+    <p><strong>Instrumen:</strong> <span th:text="${rec.requiredInstrument}"></span></p>
+    <p><strong>Status:</strong> <span th:text="${rec.status}"></span></p>
+    <p><strong>Deadline:</strong> <span th:text="${rec.deadline}"></span></p>
+
+    <div th:if="${rec.status == 'OPEN'}">
+        <details>
+            <summary style="cursor: pointer; color: #1DB954;">📝 Lamar posisi ini</summary>
+            <form th:action="@{/member/band/{bandId}/apply/{recId}(bandId=${band.id}, recId=${rec.id})}" method="post" style="margin-top: 10px;">
+                <label>Surat Motivasi:</label>
+                <textarea name="motivationLetter" rows="3" style="width:100%;" placeholder="Kenapa kamu cocok untuk posisi ini?" required></textarea>
+                <label>Ketersediaan (mulai bergabung kapan?):</label>
+                <input type="text" name="availabilityNote" style="width:100%;" placeholder="Siap bergabung mulai 1 Januari 2025" required>
+                <button type="submit" class="btn">Kirim Lamaran</button>
+            </form>
+        </details>
+    </div>
+</div>
+</body>
+</html>
