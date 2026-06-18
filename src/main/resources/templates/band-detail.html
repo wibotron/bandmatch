@@ -1,66 +1,184 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Detail Band</title>
-    <style>
-        body { font-family: Arial; max-width: 800px; margin: 30px auto; padding: 20px; }
-        .rec { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
-        .btn { background: #1DB954; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; }
-        .member-list { background: #f9f9f9; padding: 10px; border-radius: 5px; margin: 10px 0; }
-        .genre-tag { display:inline-block; background:#e0f0e0; padding:2px 10px; border-radius:12px; margin:2px; font-size:0.9em; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h1>🎵 <span th:text="${band.name}"></span></h1>
 
-<!-- MULTIGENRE: menampilkan list genre sebagai tag-tag -->
-<p><strong>Genre:</strong>
-    <span th:if="${#lists.isEmpty(band.genres)}" style="color:gray;">Belum diisi</span>
-    <span th:unless="${#lists.isEmpty(band.genres)}">
-        <span th:each="g : ${band.genres}" class="genre-tag" th:text="${g}"></span>
-    </span>
-</p>
-
-<p><strong>Deskripsi:</strong> <span th:text="${band.description != null and band.description != ''} ? ${band.description} : 'Belum diisi'"></span></p>
-<p th:if="${band.youtubeProfile}"><strong>YouTube:</strong> <a th:href="${band.youtubeProfile}" target="_blank">Kunjungi</a></p>
-<p th:unless="${band.youtubeProfile}"><strong>YouTube:</strong> <span style="color:gray;">Belum ditambahkan</span></p>
-<p th:if="${band.spotifyProfile}"><strong>Spotify:</strong> <a th:href="${band.spotifyProfile}" target="_blank">Buka</a></p>
-<p th:unless="${band.spotifyProfile}"><strong>Spotify:</strong> <span style="color:gray;">Belum ditambahkan</span></p>
-<a href="/member/explore">← Kembali ke Eksplorasi</a>
-
-<div th:if="${param.applied}" style="color: green; margin: 15px 0;">✅ Lamaran berhasil dikirim!</div>
-
-<h2>👥 Anggota Band Saat Ini</h2>
-<div th:if="${#lists.isEmpty(band.members)}" style="color: gray;">Belum ada anggota yang bergabung.</div>
-<div th:unless="${#lists.isEmpty(band.members)}" class="member-list">
-    <ul style="list-style: none; padding: 0;">
-        <li th:each="member : ${band.members}" style="padding: 5px 0; border-bottom: 1px solid #eee;">
-            <strong><span th:text="${member.name}"></span></strong>
-            (<span th:text="${member.primaryInstrument}"></span>)
-            <span style="color:gray; font-size:0.9em;">- <span th:text="${member.stageName}"></span></span>
-        </li>
-    </ul>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
 </div>
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
 
-<h2>📢 Rekrutmen Aktif</h2>
-<div th:each="rec : ${recruitments}" class="rec">
-    <h4>Posisi: <span th:text="${rec.position}"></span></h4>
-    <p><strong>Instrumen:</strong> <span th:text="${rec.requiredInstrument}"></span></p>
-    <p><strong>Status:</strong> <span th:text="${rec.status}"></span></p>
-    <p><strong>Deadline:</strong> <span th:text="${rec.deadline}"></span></p>
-
-    <div th:if="${rec.status == 'OPEN'}">
-        <details>
-            <summary style="cursor: pointer; color: #1DB954;">📝 Lamar posisi ini</summary>
-            <form th:action="@{/member/band/{bandId}/apply/{recId}(bandId=${band.id}, recId=${rec.id})}" method="post" style="margin-top: 10px;">
-                <label>Surat Motivasi:</label>
-                <textarea name="motivationLetter" rows="3" style="width:100%;" placeholder="Kenapa kamu cocok untuk posisi ini?" required></textarea>
-                <label>Ketersediaan (mulai bergabung kapan?):</label>
-                <input type="text" name="availabilityNote" style="width:100%;" placeholder="Siap bergabung mulai 1 Januari 2025" required>
-                <button type="submit" class="btn">Kirim Lamaran</button>
-            </form>
-        </details>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/member/dashboard" class="navbar-brand">🎸 BandMatch</a>
+    <div class="navbar-right">
+        <a href="/logout" class="logout-link">Logout</a>
     </div>
+</nav>
+
+<div class="container">
+
+    <a href="/member/explore" class="back-link">← Kembali ke Eksplorasi</a>
+
+    <div class="page-header">
+        <h1>🎵 <span th:text="${band.name}"></span></h1>
+    </div>
+
+    <div th:if="${param.applied}" class="alert alert-success">✅ Lamaran berhasil dikirim!</div>
+
+    <!-- INFO BAND -->
+    <div class="card">
+        <div class="card-row">
+            <span class="card-label">Genre</span>
+            <span th:if="${#lists.isEmpty(band.genres)}" style="color:var(--muted);">Belum diisi</span>
+            <span th:unless="${#lists.isEmpty(band.genres)}">
+                <span th:each="g : ${band.genres}" class="tag" th:text="${g}" style="margin-right:4px;"></span>
+            </span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Deskripsi</span>
+            <span style="font-size:0.9rem;" th:text="${band.description != null and band.description != ''} ? ${band.description} : 'Belum diisi'"></span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">YouTube</span>
+            <a th:if="${band.youtubeProfile}" th:href="${band.youtubeProfile}" target="_blank">▶ Kunjungi</a>
+            <span th:unless="${band.youtubeProfile}" style="color:var(--muted); font-size:0.9rem;">Belum ditambahkan</span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Spotify</span>
+            <a th:if="${band.spotifyProfile}" th:href="${band.spotifyProfile}" target="_blank">🎵 Buka</a>
+            <span th:unless="${band.spotifyProfile}" style="color:var(--muted); font-size:0.9rem;">Belum ditambahkan</span>
+        </div>
+    </div>
+
+    <!-- ANGGOTA BAND -->
+    <div class="card">
+        <h3 style="color:var(--muted); text-transform:uppercase; font-size:0.78rem; letter-spacing:0.08em; margin-bottom:16px;">👥 Anggota Band Saat Ini</h3>
+        <div th:if="${#lists.isEmpty(band.members)}" class="empty-state">
+            <span class="emoji">🎤</span>
+            Belum ada anggota yang bergabung.
+        </div>
+        <div th:unless="${#lists.isEmpty(band.members)}">
+            <div th:each="member : ${band.members}" style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:12px;">
+                <div style="width:36px; height:36px; background:rgba(139,92,246,0.15); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0;">🎤</div>
+                <div>
+                    <div style="font-weight:600;">
+                        <span th:text="${member.name}"></span>
+                        (<span th:text="${member.primaryInstrument}"></span>)
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--muted);" th:text="${member.stageName}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REKRUTMEN AKTIF -->
+    <div class="page-header" style="margin-top:32px; margin-bottom:16px;">
+        <h1 style="font-size:1.3rem;">📢 Rekrutmen Aktif</h1>
+    </div>
+
+    <div th:if="${recruitments.isEmpty()}" class="card empty-state">
+        <span class="emoji">📭</span>
+        Belum ada rekrutmen yang dibuka.
+    </div>
+
+    <div th:each="rec : ${recruitments}" class="card">
+        <div class="card-row">
+            <span class="card-label">Posisi</span>
+            <span class="tag" th:text="${rec.position}"></span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Instrumen</span>
+            <span th:text="${rec.requiredInstrument}"></span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Status</span>
+            <span th:if="${rec.status == 'OPEN'}" class="badge badge-accepted" th:text="${rec.status}"></span>
+            <span th:unless="${rec.status == 'OPEN'}" class="badge badge-rejected" th:text="${rec.status}"></span>
+        </div>
+        <div class="card-row">
+            <span class="card-label">Deadline</span>
+            <span th:text="${rec.deadline}"></span>
+        </div>
+
+        <div th:if="${rec.status == 'OPEN'}" class="card-section">
+            <details>
+                <summary style="cursor: pointer; color: var(--green); font-weight:600;">📝 Lamar posisi ini</summary>
+                <form th:action="@{/member/band/{bandId}/apply/{recId}(bandId=${band.id}, recId=${rec.id})}" method="post" style="margin-top: 16px;">
+                    <div class="form-group">
+                        <label>Surat Motivasi</label>
+                        <textarea name="motivationLetter" rows="3" placeholder="Kenapa kamu cocok untuk posisi ini?" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Ketersediaan (mulai bergabung kapan?)</label>
+                        <input type="text" name="availabilityNote" placeholder="Siap bergabung mulai 1 Januari 2025" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Kirim Lamaran</button>
+                </form>
+            </details>
+        </div>
+    </div>
+
 </div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 100}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.007 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
