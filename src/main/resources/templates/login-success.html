@@ -1,11 +1,111 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Login Berhasil</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Login Berhasil</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
 <body>
-<h1>👋 Selamat datang, <span th:text="${name}"></span>!</h1>
-<p>Anda akan diarahkan ke dashboard: <a th:href="${redirectUrl}" th:text="${redirectUrl}"></a></p>
-<p>Permissions Anda: <span th:text="${permissions}"></span></p>
-<p><em>Perhatikan: Method getDashboardRedirectUrl() dan getPermissions() berasal dari abstract class User,
-    tetapi hasilnya berbeda tergantung role (Polymorphism)!</em></p>
+
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
+</div>
+
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
+
+<div class="auth-wrapper">
+    <div class="auth-card" style="text-align:center; max-width:460px;">
+        <div style="font-size:3rem; margin-bottom:16px;">👋</div>
+        <div class="auth-logo">
+            <h1 style="color:#1DB954;">Selamat Datang!</h1>
+            <p>Login berhasil ke BandMatch</p>
+        </div>
+
+        <div style="background:rgba(29,185,84,0.08); border:1px solid rgba(29,185,84,0.25); border-radius:12px; padding:20px; margin:20px 0; text-align:left;">
+            <div class="card-row">
+                <span class="card-label">Nama</span>
+                <span th:text="${name}" style="color:#e8e8f0;"></span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Permissions</span>
+                <span th:text="${permissions}" style="color:#1DB954; font-weight:600;"></span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Dashboard</span>
+                <a th:href="${redirectUrl}" th:text="${redirectUrl}"></a>
+            </div>
+        </div>
+
+        <div style="background:rgba(139,92,246,0.08); border:1px solid rgba(139,92,246,0.2); border-radius:10px; padding:14px 16px; margin-bottom:20px; text-align:left;">
+            <p style="margin:0; font-size:0.82rem; color:#a0a0c0; line-height:1.6;">
+                💡 <em>Method <code style="color:#c084fc;">getDashboardRedirectUrl()</code> dan <code style="color:#c084fc;">getPermissions()</code>
+                berasal dari abstract class <strong style="color:#e8e8f0;">User</strong>,
+                tetapi hasilnya berbeda tergantung role — ini adalah contoh <strong style="color:#1DB954;">Polymorphism</strong>!</em>
+            </p>
+        </div>
+
+        <a th:href="${redirectUrl}" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:1rem; letter-spacing:0.05em;">
+            Ke Dashboard →
+        </a>
+    </div>
+</div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 120}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.008 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
