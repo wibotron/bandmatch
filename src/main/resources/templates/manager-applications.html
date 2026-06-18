@@ -1,49 +1,149 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Lamaran Masuk</title>
-    <style>
-        body { font-family: Arial; max-width: 900px; margin: 30px auto; padding: 20px; }
-        .app { border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
-        .btn { padding: 5px 10px; margin: 0 5px; border: none; border-radius: 4px; cursor: pointer; }
-        .accept { background: #28a745; color: white; }
-        .reject { background: #dc3545; color: white; }
-        .status { font-weight: bold; }
-        .header { display: flex; justify-content: space-between; align-items: center; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div class="header">
-    <h1>📩 Lamaran Masuk</h1>
-    <a href="/manager/dashboard">← Kembali ke Dashboard</a>
+
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
 </div>
 
-<div th:if="${applications.isEmpty()}" style="color: gray; margin-top: 20px;">
-    Belum ada lamaran masuk untuk band yang Anda kelola.
-</div>
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
 
-<div th:each="app : ${applications}" class="app">
-    <h3>Lamaran untuk: <span th:text="${app.targetRecruitment.position}"></span>
-        di <span th:text="${app.targetRecruitment.band.name}"></span>
-    </h3>
-    <p><strong>Pelamar:</strong> <span th:text="${app.applicant.name}"></span>
-        (<span th:text="${app.applicant.primaryInstrument}"></span>)
-    </p>
-    <p><strong>Motivasi:</strong> <span th:text="${app.motivationLetter}"></span></p>
-    <p><strong>Ketersediaan:</strong> <span th:text="${app.availabilityNote}"></span></p>
-    <p><strong>Status:</strong> <span class="status" th:text="${app.status}"></span></p>
-
-    <!-- PERBAIKAN: gunakan .name() untuk membandingkan enum -->
-    <div th:if="${app.status.name() == 'PENDING'}" style="margin-top: 10px;">
-        <form th:action="@{/manager/application/{id}/respond(id=${app.id})}" method="post" style="display:inline;">
-            <input type="hidden" name="accepted" value="true">
-            <button type="submit" class="btn accept">✅ Terima</button>
-        </form>
-        <form th:action="@{/manager/application/{id}/respond(id=${app.id})}" method="post" style="display:inline;">
-            <input type="hidden" name="accepted" value="false">
-            <button type="submit" class="btn reject">❌ Tolak</button>
-        </form>
+<nav class="navbar">
+    <a href="/manager/dashboard" class="navbar-brand">🎸 BandMatch</a>
+    <div class="navbar-right">
+        <a href="/manager/dashboard" style="color:#a0a0c0; font-size:0.9rem;">← Kembali ke Dashboard</a>
+        <a href="/logout" class="logout-link">Logout</a>
     </div>
+</nav>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div style="margin-bottom:28px; padding:24px 28px; background:rgba(52,152,219,0.07); border:1px solid rgba(52,152,219,0.15); border-radius:16px; display:flex; align-items:center; gap:16px; position:relative; overflow:hidden;">
+        <div style="font-size:2.5rem;">📩</div>
+        <div>
+            <h2 style="font-size:1.4rem; color:#e8e8f0; margin-bottom:4px;">Lamaran Masuk</h2>
+            <p style="color:#7777aa; margin:0;">Review dan kelola lamaran untuk band Anda</p>
+        </div>
+        <div style="position:absolute; right:-10px; top:-10px; font-size:7rem; opacity:0.04; pointer-events:none;">📩</div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div th:if="${applications.isEmpty()}" style="text-align:center; padding:48px 20px; background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.1); border-radius:16px; color:#7777aa;">
+        <div style="font-size:3rem; margin-bottom:12px;">📭</div>
+        <p style="margin:0;">Belum ada lamaran masuk untuk band yang Anda kelola.</p>
+    </div>
+
+    <!-- LIST LAMARAN -->
+    <div th:each="app : ${applications}" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:16px; padding:24px; margin-bottom:16px;">
+
+        <h3 style="color:#e8e8f0; margin-bottom:14px;">
+            Lamaran untuk:
+            <span style="color:#1DB954;" th:text="${app.targetRecruitment.position}"></span>
+            <span style="color:#7777aa; font-weight:400;"> di </span>
+            <span style="color:#e8e8f0;" th:text="${app.targetRecruitment.band.name}"></span>
+        </h3>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,0.03); border-radius:10px; padding:12px;">
+                <div style="color:#7777aa; font-size:0.78rem; margin-bottom:4px;">PELAMAR</div>
+                <div style="color:#e8e8f0; font-weight:600;" th:text="${app.applicant.name}"></div>
+                <div style="color:#8b5cf6; font-size:0.85rem;" th:text="${app.applicant.primaryInstrument}"></div>
+            </div>
+            <div style="background:rgba(255,255,255,0.03); border-radius:10px; padding:12px;">
+                <div style="color:#7777aa; font-size:0.78rem; margin-bottom:4px;">STATUS</div>
+                <span th:if="${app.status.name() == 'PENDING'}" style="display:inline-block; background:rgba(255,180,0,0.15); color:#ffc107; padding:3px 12px; border-radius:20px; font-size:0.85rem; font-weight:600;" th:text="${app.status}"></span>
+                <span th:if="${app.status.name() == 'ACCEPTED'}" style="display:inline-block; background:rgba(29,185,84,0.15); color:#1DB954; padding:3px 12px; border-radius:20px; font-size:0.85rem; font-weight:600;" th:text="${app.status}"></span>
+                <span th:if="${app.status.name() == 'REJECTED'}" style="display:inline-block; background:rgba(220,53,69,0.15); color:#dc3545; padding:3px 12px; border-radius:20px; font-size:0.85rem; font-weight:600;" th:text="${app.status}"></span>
+            </div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+            <div style="color:#7777aa; font-size:0.78rem; margin-bottom:4px;">MOTIVASI</div>
+            <p style="color:#a0a0c0; font-size:0.9rem; margin:0; line-height:1.6;" th:text="${app.motivationLetter}"></p>
+        </div>
+
+        <div style="margin-bottom:16px;">
+            <div style="color:#7777aa; font-size:0.78rem; margin-bottom:4px;">KETERSEDIAAN</div>
+            <p style="color:#a0a0c0; font-size:0.9rem; margin:0;" th:text="${app.availabilityNote}"></p>
+        </div>
+
+        <div th:if="${app.status.name() == 'PENDING'}" style="display:flex; gap:10px; border-top:1px solid rgba(255,255,255,0.06); padding-top:16px;">
+            <form th:action="@{/manager/application/{id}/respond(id=${app.id})}" method="post" style="display:inline;">
+                <input type="hidden" name="accepted" value="true">
+                <button type="submit" class="btn btn-primary" style="font-size:0.85rem; padding:7px 18px;">✅ Terima</button>
+            </form>
+            <form th:action="@{/manager/application/{id}/respond(id=${app.id})}" method="post" style="display:inline;">
+                <input type="hidden" name="accepted" value="false">
+                <button type="submit" class="btn btn-danger" style="font-size:0.85rem; padding:7px 18px;">❌ Tolak</button>
+            </form>
+        </div>
+
+    </div>
+
 </div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 120}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.008 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
