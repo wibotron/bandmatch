@@ -1,11 +1,106 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><title>Registrasi Berhasil</title></head>
+<head>
+    <title>Registrasi Berhasil</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
 <body>
-<h1>✅ Registrasi Berhasil!</h1>
-<p>Halo, <strong th:text="${userName}"></strong>!</p>
-<p>Anda terdaftar sebagai <strong th:text="${role}"></strong>.</p>
-<p>Dashboard Anda ada di: <a th:href="${dashboardUrl}" th:text="${dashboardUrl}"></a></p>
-<a href="/login">Login sekarang</a>
+
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
+</div>
+
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
+
+<div class="auth-wrapper">
+    <div class="auth-card" style="text-align:center; max-width:460px;">
+        <div style="font-size:3rem; margin-bottom:16px;">🎉</div>
+        <div class="auth-logo">
+            <h1 style="color:#1DB954;">Registrasi Berhasil!</h1>
+            <p>Selamat bergabung di BandMatch</p>
+        </div>
+
+        <div style="background:rgba(29,185,84,0.08); border:1px solid rgba(29,185,84,0.25); border-radius:12px; padding:20px; margin:20px 0; text-align:left;">
+            <div class="card-row">
+                <span class="card-label">Nama</span>
+                <span th:text="${userName}" style="color:#e8e8f0;"></span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Role</span>
+                <span th:text="${role}" style="color:#1DB954; font-weight:600; text-transform:capitalize;"></span>
+            </div>
+            <div class="card-row">
+                <span class="card-label">Dashboard</span>
+                <a th:href="${dashboardUrl}" th:text="${dashboardUrl}"></a>
+            </div>
+        </div>
+
+        <a href="/login" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:1rem; letter-spacing:0.05em;">
+            Login Sekarang
+        </a>
+
+        <div class="auth-footer" style="margin-top:16px;">
+            Sudah tidak sabar? Langsung <a href="/login">masuk ke dashboard</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 120}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.008 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
