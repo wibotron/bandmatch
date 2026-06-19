@@ -1,15 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Buka Rekrutmen</title>
-    <style>
-        body { font-family: Arial; max-width: 500px; margin: 50px auto; padding: 20px; }
-        input, select { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
-        button { background: #1DB954; color: white; padding: 10px; border: none; cursor: pointer; }
-        .back { margin-top: 20px; display: block; }
-        #customPosition { display: none; }
-        optgroup { font-weight: bold; color: #333; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
     <script>
         function toggleCustomPosition() {
             const select = document.getElementById('positionSelect');
@@ -18,65 +12,157 @@
             if (select.value === 'custom') {
                 customDiv.style.display = 'block';
                 customInput.required = true;
+                customInput.disabled = false;
+                select.disabled = true;
             } else {
                 customDiv.style.display = 'none';
                 customInput.required = false;
+                customInput.disabled = true;
+                select.disabled = false;
             }
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('customPositionInput').disabled = true;
+        });
     </script>
 </head>
 <body>
-<h1>📢 Buka Rekrutmen Baru</h1>
 
-<form th:action="@{/manager/band/{id}/recruitment/create(id=${bandId})}" method="post">
-    <label>Posisi yang Dibutuhkan</label>
-    <select id="positionSelect" name="position" required onchange="toggleCustomPosition()">
-        <option value="">-- Pilih Posisi --</option>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
+</div>
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
 
-        <!-- VOCAL -->
-        <optgroup label="🎤 Vokal">
-            <option value="Main Vocalist">Main Vocalist / Lead Vocalist</option>
-            <option value="Backing Vocalist">Backing Vocalist (Vokal Latar)</option>
-        </optgroup>
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/manager/dashboard" class="navbar-brand">🎸 BandMatch</a>
+    <div class="navbar-right">
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+</nav>
 
-        <!-- STRINGS / GITAR -->
-        <optgroup label="🎸 Gitar & Bass">
-            <option value="Lead Guitarist">Lead Guitarist</option>
-            <option value="Rhythm Guitarist">Rhythm Guitarist</option>
-            <option value="Acoustic Guitarist">Acoustic Guitarist</option>
-            <option value="Bassist">Bassist</option>
-        </optgroup>
+<div class="container-sm">
 
-        <!-- PERKUSI -->
-        <optgroup label="🥁 Perkusi / Ritem">
-            <option value="Drummer">Drummer</option>
-            <option value="Percussionist">Percussionist (Perkusi tambahan)</option>
-        </optgroup>
+    <a href="/manager/dashboard" class="back-link">← Kembali ke Dashboard</a>
 
-        <!-- KEYBOARD / TUTS -->
-        <optgroup label="🎹 Keyboard & Tuts">
-            <option value="Keyboardist">Keyboardist</option>
-            <option value="Pianist">Pianist</option>
-            <option value="Synthesizer Player">Synthesizer Player / Sequencer</option>
-        </optgroup>
-
-        <option value="custom">✏️ Lainnya (tulis sendiri)</option>
-    </select>
-
-    <div id="customPosition">
-        <label>Posisi Lainnya:</label>
-        <input type="text" id="customPositionInput" name="position" placeholder="Misal: Saxophone, Flute, dll">
+    <div class="page-header">
+        <h1>📢 Buka Rekrutmen Baru</h1>
+        <p>Cari musisi baru untuk mengisi posisi yang dibutuhkan bandmu</p>
     </div>
 
-    <label>Instrumen Spesifik (misal: Gitar Elektrik)</label>
-    <input type="text" name="requiredInstrument" placeholder="Gitar Elektrik, Bass, dll" required>
+    <div class="card">
+        <form th:action="@{/manager/band/{id}/recruitment/create(id=${bandId})}" method="post">
 
-    <label>Batas Akhir Pendaftaran (ISO format: YYYY-MM-DDTHH:mm)</label>
-    <input type="datetime-local" name="deadline" required>
+            <div class="form-group">
+                <label>Posisi yang Dibutuhkan</label>
+                <select id="positionSelect" name="position" required onchange="toggleCustomPosition()">
+                    <option value="">-- Pilih Posisi --</option>
 
-    <button type="submit">Buka Rekrutmen</button>
-</form>
+                    <optgroup label="🎤 Vokal">
+                        <option value="Main Vocalist">Main Vocalist / Lead Vocalist</option>
+                        <option value="Backing Vocalist">Backing Vocalist (Vokal Latar)</option>
+                    </optgroup>
 
-<a href="/manager/dashboard" class="back">← Kembali ke Dashboard</a>
+                    <optgroup label="🎸 Gitar & Bass">
+                        <option value="Lead Guitarist">Lead Guitarist</option>
+                        <option value="Rhythm Guitarist">Rhythm Guitarist</option>
+                        <option value="Acoustic Guitarist">Acoustic Guitarist</option>
+                        <option value="Bassist">Bassist</option>
+                    </optgroup>
+
+                    <optgroup label="🥁 Perkusi / Ritem">
+                        <option value="Drummer">Drummer</option>
+                        <option value="Percussionist">Percussionist (Perkusi tambahan)</option>
+                    </optgroup>
+
+                    <optgroup label="🎹 Keyboard & Tuts">
+                        <option value="Keyboardist">Keyboardist</option>
+                        <option value="Pianist">Pianist</option>
+                        <option value="Synthesizer Player">Synthesizer Player / Sequencer</option>
+                    </optgroup>
+
+                    <option value="custom">✏️ Lainnya (tulis sendiri)</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="customPosition" style="display:none;">
+                <label>Posisi Lainnya</label>
+                <input type="text" id="customPositionInput" name="position" placeholder="Misal: Saxophone, Flute, dll">
+            </div>
+
+            <div class="form-group">
+                <label>Instrumen Spesifik (misal: Gitar Elektrik)</label>
+                <input type="text" name="requiredInstrument" placeholder="Gitar Elektrik, Bass, dll" required>
+            </div>
+
+            <div class="form-group">
+                <label>Batas Akhir Pendaftaran</label>
+                <input type="datetime-local" name="deadline" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:1rem; letter-spacing:0.05em;">
+                📢 Buka Rekrutmen
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 100}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.007 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
