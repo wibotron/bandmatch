@@ -1,33 +1,119 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Edit Portofolio</title>
-    <style>
-        body { font-family: Arial; max-width: 600px; margin: 50px auto; padding: 20px; }
-        input, textarea { width: 100%; padding: 8px; margin: 5px 0 15px; display: block; }
-        button { background: #1DB954; color: white; padding: 10px 20px; border: none; cursor: pointer; }
-        .back { display: block; margin-top: 20px; }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<h1>📝 Edit Portofolio</h1>
 
-<form th:action="@{/member/portfolio/edit}" th:object="${portfolio}" method="post">
-    <label>Bio (Deskripsi diri)</label>
-    <textarea th:field="*{bio}" rows="4" placeholder="Ceritakan tentang dirimu sebagai musisi..."></textarea>
+<div class="glow-orb glow-orb-1"></div>
+<div class="glow-orb glow-orb-2"></div>
+<div class="glow-orb glow-orb-3"></div>
+<div class="glow-orb glow-orb-4"></div>
+<div class="music-notes">
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">♩</span>
+    <span class="note">♬</span>
+    <span class="note">♪</span>
+    <span class="note">♫</span>
+    <span class="note">🎸</span>
+    <span class="note">🎵</span>
+    <span class="note">♩</span>
+    <span class="note">🎶</span>
+</div>
+<div class="eq-container" id="eqContainer"></div>
+<canvas class="star-canvas" id="starCanvas"></canvas>
 
-    <label>Skill Set (pisahkan dengan koma)</label>
-    <input type="text" th:field="*{skillSet}" placeholder="Gitar, Vokal, Produksi, dll">
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/member/dashboard" class="navbar-brand">🎸 BandMatch</a>
+    <div class="navbar-right">
+        <a href="/logout" class="logout-link">Logout</a>
+    </div>
+</nav>
 
-    <label>Link YouTube Channel</label>
-    <input type="url" th:field="*{youtubeChannel}" placeholder="https://www.youtube.com/c/namachannel">
+<div class="container-sm">
 
-    <label>Username Instagram</label>
-    <input type="text" th:field="*{instagramHandle}" placeholder="username_anda (tanpa @)">
+    <a href="/member/dashboard" class="back-link">← Kembali ke Dashboard</a>
 
-    <button type="submit">Simpan Portofolio</button>
-</form>
+    <div class="page-header">
+        <h1>📝 Edit Portofolio</h1>
+        <p>Perbarui profil musikmu agar makin menarik di mata band & manager</p>
+    </div>
 
-<a href="/member/dashboard" class="back">← Kembali ke Dashboard</a>
+    <div class="card">
+        <form th:action="@{/member/portfolio/edit}" th:object="${portfolio}" method="post">
+
+            <div class="form-group">
+                <label>Bio (Deskripsi diri)</label>
+                <textarea th:field="*{bio}" rows="4" placeholder="Ceritakan tentang dirimu sebagai musisi..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Skill Set (pisahkan dengan koma)</label>
+                <input type="text" th:field="*{skillSet}" placeholder="Gitar, Vokal, Produksi, dll">
+            </div>
+
+            <div class="form-group">
+                <label>Link YouTube Channel</label>
+                <input type="url" th:field="*{youtubeChannel}" placeholder="https://www.youtube.com/c/namachannel">
+            </div>
+
+            <div class="form-group">
+                <label>Username Instagram</label>
+                <input type="text" th:field="*{instagramHandle}" placeholder="username_anda (tanpa @)">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; font-size:1rem; letter-spacing:0.05em;">
+                💾 Simpan Portofolio
+            </button>
+        </form>
+    </div>
+
+</div>
+
+<script>
+    const eqContainer = document.getElementById('eqContainer');
+    const colors = ['rgba(139,92,246,VAL)','rgba(29,185,84,VAL)','rgba(220,60,120,VAL)','rgba(52,152,219,VAL)','rgba(255,180,0,VAL)'];
+    for (let i = 0; i < 80; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'eq-bar';
+        const c = colors[Math.floor(Math.random() * colors.length)];
+        const a = (0.35 + Math.random() * 0.45).toFixed(2);
+        bar.style.background = c.replace('VAL', a);
+        bar.style.boxShadow = '0 0 8px ' + c.replace('VAL', '0.6');
+        bar.style.setProperty('--min-h', (4 + Math.random() * 10) + 'px');
+        bar.style.setProperty('--max-h', (20 + Math.random() * 70) + 'px');
+        bar.style.animationDuration = (0.4 + Math.random() * 1.2).toFixed(2) + 's';
+        bar.style.animationDelay = (Math.random() * 2).toFixed(2) + 's';
+        eqContainer.appendChild(bar);
+    }
+    const canvas = document.getElementById('starCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const stars = Array.from({length: 100}, () => ({
+        x: Math.random() * canvas.width, y: Math.random() * canvas.height,
+        r: Math.random() * 1.4 + 0.2, alpha: Math.random(),
+        speed: Math.random() * 0.007 + 0.003,
+        color: ['rgba(139,92,246,','rgba(29,185,84,','rgba(255,255,255,','rgba(52,152,219,'][Math.floor(Math.random()*4)]
+    }));
+    function animateStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        stars.forEach(s => {
+            s.alpha += s.speed;
+            if (s.alpha > 1 || s.alpha < 0) s.speed *= -1;
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            ctx.fillStyle = s.color + s.alpha.toFixed(2) + ')';
+            ctx.fill();
+        });
+        requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
 </body>
 </html>
